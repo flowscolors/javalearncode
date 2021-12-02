@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="java-concurrent" />
+        <module name="java-netty" />
+        <module name="springcloud-eureka" />
+        <module name="designpatterns" />
+        <module name="springcloud-gateway" />
+        <module name="java-os-io" />
+        <module name="java-middleware-mysql" />
+        <module name="spring-bean" />
+        <module name="java-base-stream" />
+        <module name="java-base-collection" />
+        <module name="java-jvm-gc" />
+        <module name="java-middleware-redis" />
+        <module name="samll-jvm" />
+        <module name="commonscenes" />
+        <module name="java-middleware-netty" />
+        <module name="java-middleware-es" />
+        <module name="java-os-net" />
+        <module name="algorithm" />
+        <module name="java-middleware-kafka" />
+        <module name="small-spring" />
+        <module name="java-base-core" />
+        <module name="java-kubernetes" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="algorithm" target="1.8" />
+      <module name="commonscenes" target="1.8" />
+      <module name="designpatterns" target="1.8" />
+      <module name="eureka" target="1.8" />
+      <module name="java-base" target="1.8" />
+      <module name="java-base-collection" target="1.8" />
+      <module name="java-base-core" target="1.8" />
+      <module name="java-base-stream" target="1.8" />
+      <module name="java-concurrent" target="1.8" />
+      <module name="java-jvm" target="1.8" />
+      <module name="java-jvm-gc" target="1.8" />
+      <module name="java-kubernetes" target="1.8" />
+      <module name="java-middleware" target="1.8" />
+      <module name="java-middleware-es" target="1.8" />
+      <module name="java-middleware-kafka" target="1.8" />
+      <module name="java-middleware-mysql" target="1.8" />
+      <module name="java-middleware-netty" target="1.8" />
+      <module name="java-middleware-redis" target="1.8" />
+      <module name="java-netty" target="1.8" />
+      <module name="java-os" target="1.8" />
+      <module name="java-os-io" target="1.8" />
+      <module name="java-os-net" target="1.8" />
+      <module name="javalearncode" target="1.8" />
+      <module name="samll-jvm" target="8" />
+      <module name="small-spring" target="8" />
+      <module name="spring" target="1.8" />
+      <module name="spring-bean" target="1.8" />
+      <module name="springcloud" target="1.8" />
+      <module name="springcloud-eureka" target="1.8" />
+      <module name="springcloud-gateway" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="algorithm" options="-parameters" />
+      <module name="commonscenes" options="-parameters" />
+      <module name="designpatterns" options="-parameters" />
+      <module name="java-base" options="-parameters" />
+      <module name="java-base-collection" options="-parameters" />
+      <module name="java-base-core" options="-parameters" />
+      <module name="java-base-stream" options="-parameters" />
+      <module name="java-concurrent" options="-parameters" />
+      <module name="java-jvm" options="-parameters" />
+      <module name="java-jvm-gc" options="-parameters" />
+      <module name="java-kubernetes" options="-parameters" />
+      <module name="java-middleware" options="-parameters" />
+      <module name="java-middleware-es" options="-parameters" />
+      <module name="java-middleware-kafka" options="-parameters" />
+      <module name="java-middleware-mysql" options="-parameters" />
+      <module name="java-middleware-netty" options="-parameters" />
+      <module name="java-middleware-redis" options="-parameters" />
+      <module name="java-netty" options="-parameters" />
+      <module name="java-os" options="-parameters" />
+      <module name="java-os-io" options="-parameters" />
+      <module name="java-os-net" options="-parameters" />
+      <module name="javalearncode" options="-parameters" />
+      <module name="samll-jvm" options="" />
+      <module name="small-spring" options="" />
+      <module name="spring" options="-parameters" />
+      <module name="spring-bean" options="-parameters" />
+      <module name="springcloud" options="-parameters" />
+      <module name="springcloud-eureka" options="-parameters" />
+      <module name="springcloud-gateway" options="-parameters" />
+    </option>
+  </component>
+</project>

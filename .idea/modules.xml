@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/algorithm/algorithm.iml" filepath="$PROJECT_DIR$/algorithm/algorithm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/commonscenes/commonscenes.iml" filepath="$PROJECT_DIR$/commonscenes/commonscenes.iml" />
+      <module fileurl="file://$PROJECT_DIR$/designpatterns/designpatterns.iml" filepath="$PROJECT_DIR$/designpatterns/designpatterns.iml" />
+      <module fileurl="file://$PROJECT_DIR$/springcloud/eureka.iml" filepath="$PROJECT_DIR$/springcloud/eureka.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-base/java-base.iml" filepath="$PROJECT_DIR$/java-base/java-base.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-base/java-base-collection/java-base-collection.iml" filepath="$PROJECT_DIR$/java-base/java-base-collection/java-base-collection.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-base/java-base-core/java-base-core.iml" filepath="$PROJECT_DIR$/java-base/java-base-core/java-base-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-base/java-base-stream/java-base-stream.iml" filepath="$PROJECT_DIR$/java-base/java-base-stream/java-base-stream.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-concurrent/java-concurrent.iml" filepath="$PROJECT_DIR$/java-concurrent/java-concurrent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-jvm/java-jvm.iml" filepath="$PROJECT_DIR$/java-jvm/java-jvm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-jvm/java-jvm-gc/java-jvm-gc.iml" filepath="$PROJECT_DIR$/java-jvm/java-jvm-gc/java-jvm-gc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-kubernetes/java-kubernetes.iml" filepath="$PROJECT_DIR$/java-kubernetes/java-kubernetes.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-middleware/java-middleware.iml" filepath="$PROJECT_DIR$/java-middleware/java-middleware.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-middleware/java-middleware-es/java-middleware-es.iml" filepath="$PROJECT_DIR$/java-middleware/java-middleware-es/java-middleware-es.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-middleware/java-middleware-kafka/java-middleware-kafka.iml" filepath="$PROJECT_DIR$/java-middleware/java-middleware-kafka/java-middleware-kafka.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-middleware/java-middleware-mysql/java-middleware-mysql.iml" filepath="$PROJECT_DIR$/java-middleware/java-middleware-mysql/java-middleware-mysql.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-middleware/java-middleware-netty/java-middleware-netty.iml" filepath="$PROJECT_DIR$/java-middleware/java-middleware-netty/java-middleware-netty.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-middleware/java-middleware-redis/java-middleware-redis.iml" filepath="$PROJECT_DIR$/java-middleware/java-middleware-redis/java-middleware-redis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-os/java-netty/java-netty.iml" filepath="$PROJECT_DIR$/java-os/java-netty/java-netty.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-os/java-os.iml" filepath="$PROJECT_DIR$/java-os/java-os.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-os/java-os-io/java-os-io.iml" filepath="$PROJECT_DIR$/java-os/java-os-io/java-os-io.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-os/java-os-net/java-os-net.iml" filepath="$PROJECT_DIR$/java-os/java-os-net/java-os-net.iml" />
+      <module fileurl="file://$PROJECT_DIR$/javalearncode.iml" filepath="$PROJECT_DIR$/javalearncode.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-jvm/samll-jvm/samll-jvm.iml" filepath="$PROJECT_DIR$/java-jvm/samll-jvm/samll-jvm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring/small-spring/small-spring.iml" filepath="$PROJECT_DIR$/spring/small-spring/small-spring.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring/spring.iml" filepath="$PROJECT_DIR$/spring/spring.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring/spring-bean/spring-bean.iml" filepath="$PROJECT_DIR$/spring/spring-bean/spring-bean.iml" />
+      <module fileurl="file://$PROJECT_DIR$/springcloud/springcloud.iml" filepath="$PROJECT_DIR$/springcloud/springcloud.iml" />
+      <module fileurl="file://$PROJECT_DIR$/springcloud/springcloud-eureka/springcloud-eureka.iml" filepath="$PROJECT_DIR$/springcloud/springcloud-eureka/springcloud-eureka.iml" />
+      <module fileurl="file://$PROJECT_DIR$/springcloud/springcloud-gateway/springcloud-gateway.iml" filepath="$PROJECT_DIR$/springcloud/springcloud-gateway/springcloud-gateway.iml" />
+    </modules>
+  </component>
+</project>
