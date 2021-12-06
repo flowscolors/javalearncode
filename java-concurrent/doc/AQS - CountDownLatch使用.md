@@ -14,12 +14,14 @@
                 注意这种并发操作还要考虑httpclient连接池的多并发操作。
                 
 ## CountDownLatch 内部方法
-```
+```text
 1.Sync继承AQS
 Sync(int count) { setState(count);}                    初始化方法声明锁的个数
+
 protected int tryAcquireShared(int acquires) {
             return (getState() == 0) ? 1 : -1;
         }                                              重写共享模式获取锁，只用当state=0才返回1，可以获取到。否则进阻塞队列，这样当state=0，所有阻塞的方法都被可以执行。
+
 protected boolean tryReleaseShared(int releases) {
  // Decrement count; signal when transition to zero
             for (;;) {

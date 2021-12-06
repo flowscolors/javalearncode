@@ -76,12 +76,11 @@ zrank board zhaoliu
 ## Redis Java程序使用
 一般是要在Java客户端使用上再封装一层Util工具类。
 ### 使用Lettue 
-对应RedisTemplate的使用。
+对应RedisTemplate的使用。org.springframework.data.redis.core.RedisTemplate
 
-org.springframework.data.redis.core.RedisTemplate
-```
-redisTemplate.setKeySerialize
-```
+
+redisTemplate.setKeySerialize  最常用的一步，把对象存Redis，需要对象实现序列化接口Serializable
+
 
 
 ## Redis配置使用

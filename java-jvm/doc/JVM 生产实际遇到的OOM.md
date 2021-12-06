@@ -45,7 +45,30 @@ Caused by: java.lang.OutOfMemoryError: GC overhead limit exceeded
 比如大量文本、视频，直接全量加载到内存处理。 
 
 ### 4.使用默认JVM参数
-JDK8默认老年代开启自动调整算法。
+JDK8默认老年代开启自动调整算法。来看一个实际的案例。
+在一个limit 2C2G的容器里面，没有配置有关jvm的启动参数，使用默认配置。查看jmap -heap配置
+```text
+JVM Version is 25.292-b10
+Heap Configuration:
+    MinHeapFreeRatio     = 0
+    MaxHeapFreeRatio     = 100
+    MaxHeapSize          = 536870912 (512.0MB)
+    NewSize              = 11010048 (10.5MB)
+    MaxNewSize           = 178782208 (170.5MB)
+    OldSize              = 22544384 (21.5MB)
+    NewRatio             = 2
+    SurvivorRatio        = 8
+    MetaspaceSize        = 21807104 (20.79MB)
+    CompressedClassSpaceSize = 1073741824 (1024.0MB)
+    MaxMetaspaceSize     = 175921886044415 MB
+    G1HeapRegionSize     = 0
+```
+
+MaxHeapSize 最大堆内存512MB，是因为读取了limit限制，拿了1/4当上限。
+MaxNewSize  最大新生代170.5MB，是因为读取了默认1/3的堆上限，新生代老年代1：2。
+MetaspaceSize 默认20.79MB,默认值。
+MaxMetaspaceSize 大metspaace上限175PB，因为拿的是虚拟内存的上限。
+GC回收器使用ParallOld，特点是会根据当前内存值进行堆内存的动态大小调节。
 
 ### 5.大量反射代码导致老年代对象过多
 
