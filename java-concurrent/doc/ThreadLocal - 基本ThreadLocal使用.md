@@ -17,6 +17,7 @@ ThreadLocal，此类提供线程局部变量。1.2版本的Java中就有了，�
 ## ThreadLocal 内部方法
 需要注意几点的是:
 1.每个线程Thread中有一个ThreadLocalMap的对象threadLocals，但是该对象由ThreadLocal维护 ThreadLocal.ThreadLocalMap threadLocals = null; 完成线程线性探针哈希映射
+所以ThreadLocal实际是map中节点的value值，可以说是最小单元了（毕竟它一个ThreadLocal只能存储一个Object对象），多个含ThreadLocal的值组成一个ThreadLocalMap，被一个线程指向。
 
 2.ThreadLocalMap 是一个定制的哈希映射表，注意这是一个由数组实现的hash表，仅适用于维护线程本地值，不会在 ThreadLocal 类之外导出任何操作。该类是包私有的，但允许在类 Thread 中声明字段。
 为了帮助处理非常大且长期存在的用法，哈希表条目使用 WeakReferences 作为键 key。然而，由于不使用引用队列，所以只有在表开始耗尽空间时才能保证删除陈旧的条目。
@@ -24,6 +25,8 @@ ThreadLocal，此类提供线程局部变量。1.2版本的Java中就有了，�
 3.ThreadLocalMap 的条目扩展了 WeakReference，使用其主要 ref 字段作为键（它总是一个 ThreadLocal 对象）。请注意，空键（即 entry.get()  == null）意味着不再引用该键，因此可以从表中删除条目。此类条目在以下代码中被称为为“陈旧条目”
 
 4.Entry其实就是继承了WeakReference，内部实际就用一个Object存了Thread的类型，存与此 ThreadLocal 关联的值。
+
+![](https://cdn.jsdelivr.net/gh/flowscolors/resources-backup@main/img_bed/ThreadLocal-Entry.png)
 
 ThreadLocal常用内部方法:
 ```text
@@ -119,10 +122,28 @@ ThreadLocal常用内部方法:
 
 
 ## ThreadLocal特点
-1.ThreadLocal无法解决共享变量的更新问题。
+1.ThreadLocal无法解决共享变量的更新问题。所以ThreadLocal变量建议使用static修饰，这个变量是针对一个线程内所有操作共享的，
 
 
+2.对象弱引用的GC泄漏问题。
+由于大多数情况下，我们使用线程池的场景，线程的生命周期很长，如果我们往ThreadLocal里面set了很大很大的Object对象，虽然set、get等等方法在特定的条件会调用进行额外的清理。
+但是ThreadLocal被垃圾回收后，在ThreadLocalMap里对应的Entry的键值会变成null，但是后续在也没有操作set、get等方法了。
 
+所以最佳实践是在不使用这个ThreadLocal对象时，主动调用remove方法进行清理。
+
+结合上面两点，最合适的使用方法是:
+```text
+public class ThreadLocalTest {
+    
+    private static ThreadLocal<> threadlocal ;
+    
+    try {
+        // 其它业务逻辑
+    } finally {
+        threadLocal对象.remove();
+    }
+}   
+```
 
 
 ## 常用问题

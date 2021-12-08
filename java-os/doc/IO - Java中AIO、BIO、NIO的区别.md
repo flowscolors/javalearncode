@@ -42,6 +42,8 @@ executor.submit(new Handler(socket));
 }
 ```
 
+![](https://cdn.jsdelivr.net/gh/flowscolors/resources-backup@main/img_bed/BIO-model.png)
+
 * NIO  non-blocking I/O，同步非阻塞。服务器实现模式为一个请求一个线程，即客户端发送的连接请求都会注册到多路复用器上，多路复用器轮询到连接有I/O请求时才启动一个线程进行处理。。
    NIO需要解决的最根本的问题就是存在于BIO中的两个阻塞，分别是等待连接时的阻塞和等待数据时的阻塞。  
    1.如果单线程服务器在等待数据时阻塞，那么第二个连接请求到来时，服务器是无法响应的。如果是多线程服务器，那么又会有为大量空闲请求产生新线程从而造成线程占用系统资源，线程浪费的情况。
@@ -95,9 +97,11 @@ interface ChannelHandler{
   }
 ```
  
+![](https://cdn.jsdelivr.net/gh/flowscolors/resources-backup@main/img_bed/NIO-model.png)
 
 * AIO  Async I/O 异步IO，OS需要支持异步IO操作API。
 
+异步的概念和同步相对。当一个异步过程调用发出后，调用者不能立刻得到结果。实际处理这个调用的部件在完成后，通过状态、通知和回调来通知调用者。
 
 
 对上述三种情况的对比，以socket.read()为例子：
@@ -304,3 +308,4 @@ Netty的对JDK自带的NIO的API进行封装，解决上述问题，主要特点
 参考文档：  
 https://tech.meituan.com/2016/11/04/nio.html
 https://www.cnblogs.com/crazymakercircle/p/9833847.html
+https://www.cnblogs.com/crazymakercircle/p/13903625.html

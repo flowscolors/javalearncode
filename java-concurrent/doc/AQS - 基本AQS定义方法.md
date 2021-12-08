@@ -47,7 +47,8 @@ http://gee.cs.oswego.edu/dl/papers/aqs.pdf
    当执行Acquire(1)时，会通过tryAcquire获取锁。在这种情况下，如果获取锁失败，就会在acquire去调用addWaiter加入到等待队列中去。获取锁失败后，会执行addWaiter(Node.EXCLUSIVE)加入等待队列。等待队列中会调用acquireQueued方法进行自旋判断是否获取到锁。
    acquireQueued跳出条件为： “前置节点是头结点，且当前线程获取锁成功”。并且为了防止因死循环导致CPU资源被浪费，我们会判断前置节点的状态来决定是否要将当前线程挂起。
    
-   当执行release时，会通过tryRealse去判断锁是否应该释放。如果tryrealse返回true。则判断头结点不为空并且头结点的waitStatus不是初始化节点情况，解除等待队列中线程挂起状态，让队列中线程开始竞争state。
+   整体除了state的CAS，当执行release时，会通过tryRealse去判断锁是否应该释放。如果tryrealse返回true。实际的acquire、release，中间会使用LockSupport的LockSupport的park、unpark，实际调用unsafe方法进行putObject。
+   则判断头结点不为空并且头结点的waitStatus不是初始化节点情况，解除等待队列中线程挂起状态，让队列中线程开始竞争state。
    
 那么综上，我们以朴素的价值观得出，"AQS 是一个用于构建锁、同步器等线程协作工具类的框架"这件事。
 
