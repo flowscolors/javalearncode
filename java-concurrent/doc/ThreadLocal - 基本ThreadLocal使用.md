@@ -1,15 +1,22 @@
 
 
-ThreadLocal，此类提供线程局部变量。1.2版本的Java中就有了，所以它并不能像1.5的AQS系列一样去做同步，而只是做一个线程独立变量的功能。
-这些变量与普通变量不同，因为每个访问该变量的线程（通过其 * {@code get} 或 {@code set} 方法）都有自己的、独立初始化的变量副本。 
+ThreadLocal，此类提供线程局部变量。1.2版本的Java中就有了，所以它并不能像1.5的AQS系列一样去做同步，而只是做一个线程独立变量的功能。当然某种程度上这也可以解决多线程安全的问题。  
+这些变量与普通变量不同，因为每个访问该变量的线程（通过其 * {@code get} 或 {@code set} 方法）都有自己的、独立初始化的变量副本。
+
+local还是那个local，并没有在每个线程产生local副本，只不过调用set方法的时候，将它与传入的值以键值对的形式，存储于每个线程内部持有的ThreadLocalMap对象里。
+ThreadLocal实现方式是各线程对共享的ThreadLocal实例进行操作，实际上是以该实例为键对内部持有的ThreadLocalMap对象进行操作。可以说ThreadLocal类只是提供了访问这个Map的接口。
+
+所以整个Threadlocal的核心其实是ThreadLocalMap，并且这个hashmap底层是基于数组实现，内部是一个Entry数组，下标是通过基于对ThreadLocal对象的threadLocalHashCode计算得来。
+而实际存的对象Entry继承自WeakReference，其中key是对ThreadLocal的弱引用，ThreadLocal实际存的值为value。Entry(ThreadLocal<?> k, Object v)。  
 
 只要线程是活动的并且ThreadLocal实例是可访问的，每个线程都持有一个对它的线程局部变量副本的隐式引用；在一个线程消失后，它的所有线程本地实例的副本都会受到垃圾回收的影响（除非存在对这些副本的其他引用）
 
 场景 - {@code ThreadLocal} 实例通常是希望将状态与线程相关联的类中的私有静态字段（例如，用户 ID 或事务 ID）:
 1.官方例子。例如，下面的类生成每个线程的本地唯一标识符。线程的 id 在它第一次调用 {@code ThreadId.get()} 时被分配并且在后续调用中保持不变。
 
-2.保存线程上下文信息，在任意需要的地方可以获取。比如存一串请求的id用ThreadLocal进行set，后续把请求串起来。否则Controller中的id不一定拿到固定的。
-    比如Spring的事务管理，用ThreadLocal存储Connection，从而各个dao层可以获取同一Connection进行事务回滚、提交操作。
+2.保存线程上下文信息，在任意需要的地方可以获取。
+    比如存一串请求的traceid用ThreadLocal进行set，后续把请求串起来。否则你就要多层Service方法，每次把这个traceid放到入参，一层层传下去。而实际你只是controller收到这个信息，需要dao层直接存数据库，中间不需要用。
+    比如Spring的事务管理，用ThreadLocal存储Connection，每个线程拿到的连接肯定是要不同的，从而各个dao层可以获取同一Connection进行事务回滚、提交操作。
     
 3.存线程安全的变量，避免某些情况需要考虑线程安全必须同步带来的性能损失
 
@@ -74,8 +81,8 @@ ThreadLocal常用内部方法:
     }                                //用于建立初始值的 set() 变体。使用private代替 set() 以防用户覆盖 set() 方法。
     
     public void set(T value) {
-        Thread t = Thread.currentThread();
-        ThreadLocalMap map = getMap(t);
+        Thread t = Thread.currentThread();  //首先获得当前执行ThreadLocal.set()语句所在的线程对象，也就是t
+        ThreadLocalMap map = getMap(t);     //然后通过getMap()获得t内部持有的ThreadLocalMap对象，
         if (map != null)
             map.set(this, value);
         else
@@ -88,15 +95,15 @@ ThreadLocal常用内部方法:
              m.remove(this);
      }                           //删除此线程局部变量的当前线程值。如果此线程局部变量随后被调用由当前线程将通过调用其 {@link #initialValue} 方法重新初始化
 
-    static class ThreadLocalMap {
+    static class ThreadLocalMap {  /ThreadLocalMap属于自定义的map，是一个带有hash功能的静态内部类
 
-        static class Entry extends WeakReference<ThreadLocal<?>> {
-            /** The value associated with this ThreadLocal. */
+        static class Entry extends WeakReference<ThreadLocal<?>> {  //entry继承自WeakReference，用main方法引用的字段作为entry中的key。
+            /** The value associated with this ThreadLocal. */      //当entry.get() == null的时候，意味着键将不再被引用。
             Object value;
 
-            Entry(ThreadLocal<?> k, Object v) {
+            Entry(ThreadLocal<?> k, Object v) {            //当构造器传入参数后，代表键的k会传入super()中，也就是它会首先执行父类WeakReference的构造器
                 super(k);
-                value = v;
+                value = v;                                //这句value = v，让v的值有了强引用
             }
         }
 
@@ -120,16 +127,26 @@ ThreadLocal常用内部方法:
         }
 ```
 
+只要我们使用的ThreadLocal变量不释放，也就是栈里的强引用一直存在，在Entry里的ThreadLocal就不会被回收，即使它是弱引用。
+
+![](https://cdn.jsdelivr.net/gh/flowscolors/resources-backup@main/img_bed/threadlocal-内存模型.JPG)
+
+如果我们使用完ThreadLocal变量，手动释放ThreadLocal对象，比如把ThreadLocal对象置为null了，但是对应的value还是被Entry引用着，所以value是不能被JDK垃圾回收的。
+
+![](https://cdn.jsdelivr.net/gh/flowscolors/resources-backup@main/img_bed/threadlocal-内存泄漏.JPG)
 
 ## ThreadLocal特点
 1.ThreadLocal无法解决共享变量的更新问题。所以ThreadLocal变量建议使用static修饰，这个变量是针对一个线程内所有操作共享的，
 
 
 2.对象弱引用的GC泄漏问题。
-由于大多数情况下，我们使用线程池的场景，线程的生命周期很长，如果我们往ThreadLocal里面set了很大很大的Object对象，虽然set、get等等方法在特定的条件会调用进行额外的清理。
-但是ThreadLocal被垃圾回收后，在ThreadLocalMap里对应的Entry的键值会变成null，但是后续在也没有操作set、get等方法了。
+首先如果我们使用new Thread的方法去执行ThreadLocal相关工作，当线程退出后，线程引用的ThreadLocalMaps就没了强引用，此时这个map的key value都直接可以被GC。
 
-所以最佳实践是在不使用这个ThreadLocal对象时，主动调用remove方法进行清理。
+但是由于大多数情况下，我们使用线程池的场景，线程的生命周期很长，ThreadLocalMaps一直在，如果我们往ThreadLocal里面set了很大很大的Object对象，ThreadLocalMaps的key是ThreadLocal、value是大对象。
+
+以下面的ThreadLocalTest为例，运行时声明ThreadLocal放到ThreadLocalMaps，运行结束出栈后，ThreadLocalMaps中的key没有了强引用，会在下次被GC掉。但是大的vaule会一直存在。
+
+所以最佳实践是在不使用这个ThreadLocal对象时，主动调用remove方法进行清理。因为remove会把key-vaule对都从ThreadLocalMaps中取出。
 
 结合上面两点，最合适的使用方法是:
 ```text
@@ -146,8 +163,23 @@ public class ThreadLocalTest {
 ```
 
 
-## 常用问题
+## 使用的坑
 1. SimpleDateFormat是线程不安全的类，一般不要定义为static变量，每次使用时new则可规避问题。如果定义为static，则必须加锁，或者使用DataUtils工具类。
 
-2.ThreadLocal中使用了弱引入，导致Entry中键值对可能会被回收，为了避免内存泄漏，需要在finally中主动调用remove操作。
+2.ThreadLocal中使用了弱引入，导致Entry中键值对可能会被回收，为了避免内存泄漏，需要在finally中主动调用remove操作。哪怕把threadlocal对象置为null也是没有用的，当然实际也不是我们自己null，而是GC时候会给你置null。
+参考文档： https://cgiirw.github.io/2018/05/30/ThreadLocal/
 
+3.ThreadLocalMap是自己实现的类似HashMap的功能，当出现Hash冲突（通过两个key对象的hash值计算得到同一个数组下标）时，它没有采用链表模式，而是采用的线性探测的方法，既当发生冲突后，就线性查找数组中空闲的位置。
+  所以当Entry[]数组较大时，这个性能会很差，所以建议尽量控制ThreadLocal的数量。
+  
+
+## 常见面试题
+1.为什么ThreadLocal使用弱引用？
+虽然ThreadLocal是设置成弱引用，但其实堆栈中线程执行的时候是存在对threadlocal的强引用。而当线程任务执行完，就结束了对threadlocal的强引用，这时候说明thredlocal就没用了。  
+但是此时threadlocalmap中还是有key指向它，如果是默认的强引用，则无法进行GC。而使用弱引用，相当于让没用的threadlocal在下一次GC时被回收。
+
+
+
+
+参考文档：  
+https://mp.weixin.qq.com/s/7IijM60IVFMbr1WA3vhT-w

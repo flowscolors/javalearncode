@@ -196,6 +196,9 @@ public V remove(Object key) {···}
 ## HashMap初始化长度、扩容和缩容
 初始化长度length(默认值是16)，Load factor为负载因子(默认值是0.75)
 
+冲突：当两个对象的hashcode计算值相同，就产生了hash冲突，hashmap会先把冲突对象挂到一个链表上，当链表长度到8时且数组长度大于64时，会树化，红黑树。
+这里的链表阶段中，新的冲突对象插入链表在JDK7里是头插法，在JDK8里是尾插法。
+
 扩容:
 
 
@@ -208,3 +211,10 @@ https://www.shuzhiduo.com/A/rV57qYAGzP/
 https://www.zhihu.com/question/366679456
 
 ## hashmap并发的问题
+1.
+
+
+2.
+
+
+3.hashmap一定是线程不安全的吗？虽然本身是一个线程不安全的容器，但是如果使用场景只是只读，那就是线程安全的。

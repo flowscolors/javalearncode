@@ -100,6 +100,15 @@ TTASLock 的 LOCKED.get(this) 仅仅是一次本地自旋。仅检查处理器�
 https://www.scss.tcd.ie/Jeremy.Jones/VivioJS/
 https://www.scss.tcd.ie/Jeremy.Jones/VivioJS/caches/MESIHelp.htm
 
+
+### 前端 - 缓存行对于性能的影响
+缓存行对代码性能带来的影响。因为volatile 的写入操作，因为这个写入是会使得各个层级的 cache 都失效，然后写入内存的，因此相比直接写入肯定是慢的.
+
+waiting code
+
+参考文档： 
+https://rain.baimuxym.cn/article/18
+
 ### 后端 - ALU
 这里ALU计算单元实际也是并行执行，所以可能会乱序。这就会带来指令重排的问题。
 因为是流水线式的输入，则处理器(CPU)为了提高效率可能会对输入的代码进行乱序执行。

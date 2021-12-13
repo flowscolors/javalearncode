@@ -21,9 +21,15 @@ public class ArrayList<E> extends AbstractList<E>
     private static final int DEFAULT_CAPACITY = 10;               //默认长度 10
     
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8; //最大长度2^30-8
+
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {}; //默认初始化为空数组
     
     private int size;
     
+    public ArrayList() {
+        this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;  //无参默认初始化为空数组
+    }
+
     //初始化方法 
     public ArrayList(int initialCapacity) {
         if (initialCapacity > 0) {
@@ -51,14 +57,14 @@ public class ArrayList<E> extends AbstractList<E>
     
     //add操作 添加之前先检查是否需要扩容
     public boolean add(E e) {
-        ensureCapacityInternal(size + 1);  // Increments modCount!!
+        ensureCapacityInternal(size + 1);  // Increments modCount!! size作为数组下标从0开始加
         elementData[size++] = e;
         return true;
     }
 
     private void ensureCapacityInternal(int minCapacity) {
-        if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
-            minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
+        if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {  //如果初始化的数组是空数组，把minCapacity置为10，并不是把数组长度置为10
+            minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);  
         }
 
         ensureExplicitCapacity(minCapacity);
@@ -67,8 +73,8 @@ public class ArrayList<E> extends AbstractList<E>
     private void ensureExplicitCapacity(int minCapacity) {
         modCount++;
 
-        // overflow-conscious code
-        if (minCapacity - elementData.length > 0)
+        // overflow-conscious code  数组放不下的时候，扩容grow()
+        if (minCapacity - elementData.length > 0)   //当首次放到10的时候触发扩容
             grow(minCapacity);
     }
     
@@ -108,7 +114,7 @@ public class ArrayList<E> extends AbstractList<E>
 
 ### 2.LinkedList内部方法
 LinkedList常用方法：
-并且LinkedList既有队列的peek、poll，又有堆栈的pop、push。
+并且LinkedList既有队列的peek、poll，又有堆栈的pop、push。并且LinkedList是有序的，按照放入顺序排序。  
 ```java
 public class LinkedList<E>
     extends AbstractSequentialList<E>
@@ -171,3 +177,24 @@ https://www.chuckfang.com/2019/06/21/arraylist-and-linkedlist/
 https://moe.best/java/java-array-and-linked.html
 
 ### 3.ArrayList、LinkedList线程不安全，并发问题
+
+ArrayList线程不安全:
+
+场景一:多线程调用add()方法。此时可能会触发两个问题。注意这里的ArrayList是作为共享变量出现。
+
+1.当此时是需要进行数组扩容的临界点时，如果有两个线程同时进行插入操作，可能会导致数组下标越界异常。
+在数组容量为9的时候同时两个线程执行add()，都先判断加完是10，不需要扩容。于是 elementData[size++] = e;实际前一个做完后，size变为10，于是后一个就变为往一个长度为10的数组的位置11放值，数组越界。
+
+2.由于往数组中添加元素不是原子操作，所以可能会导致元素覆盖的情况出现。
+同样也是elementData[size++] = e这个操作不是一个原子操作，当线程1刚把值放进去，还未执行size++时被CPU挂起；线程2就会把值也放到这个位置，于是后面的值就覆盖了前面的值。
+
+稳定复现可以重写ArrayList方法，并且以上两个问题都可以在add()方法前加synchronized 解决。
+
+
+ArrayList一定是线程不安全的吗？
+场景一：使用场景只是只读，那就是线程安全的。大家都是来读。
+场景二：当 ArrayList 是方法内的局部变量时，比如@Service中的某个方法，是没有线程安全的问题的。
+
+
+参考文档： 
+https://mp.weixin.qq.com/s/MNeD5Idjqgw87wI0reqrvw

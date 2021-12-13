@@ -1,8 +1,24 @@
 
 
-JDK8内存结构。
+## 内存结构
+JDK8内存结构。线程独占:Java虚拟机栈、本地方法栈、程序计数器 线程共享：Java虚拟机堆、metaspace
 
 ![](https://cdn.jsdelivr.net/gh/flowscolors/resources-backup@main/img_bed/JDK8-内存结构.jpg)
+
+除了上面的还有一些直接内存占用。如gc、code、internal、symbol等内存占用，开启Native Memory Trace可见。随应用大概占用40~100M。
+
+```text
+-Xms20m
+-Xmx20m
+-XX:MaxDirectMemorySize=10M
+-XX:PermSize=10M
+-XX:MaxPermSize=10M
+-XX:NativeMemoryTracking=summary
+
+jcmd 11216 VM.native_memory summary scale=MB
+```
+
+![](https://cdn.jsdelivr.net/gh/flowscolors/resources-backup@main/img_bed/jvm-trace.JPG)
 
 ## GC Roots
 在Java中，可作为 GC Roots 对象的一般包括如下几种：
@@ -173,6 +189,49 @@ jvm 采用主动式中断的方式，在垃圾回收发生时让所有线程都�
 安全点机制保证了程序执行时，在不太长的时间内就会遇到可进入垃圾回收过程的安全点。但是，程序“不执行”的时候，线程就无法响应虚拟机的中断请求，如用户线程处于Sleep状态或者Blocked状态，这个时候就没法再走到安全的地方去中断挂起自己。这就需要安全区域来解决了。
 
 安全区域是指能够确保在某一段代码片段之中，引用关系不会发生变化，因此，在这个区域中任意地方开始垃圾回收都是安全的。当用户线程执行到安全区域里面的代码时，首先会标识自己已经进入了安全区域，那样当这段时间里虚拟机要发起垃圾回收时就不必去管这些已声明自己在安全区域内的线程了。当线程要离开安全区域时，它要检查虚拟机是否已经完成了需要暂停用户线程的阶段，如果完成了，那线程就继续执行；否则它就必须一直等待，直到收到可以离开安全区域的信号为止。
+
+
+
+
+### 安全点与线程执行
+ThreadSafePoint这里例子中，通常情况下主线程的输出会按主线程的逻辑来，而另外两个线程异步的走，而在该例中主线程一直等待另外线程执行结束。
+
+原因其实就是主线程在等t1、t2线程进入安全点。 而JIT对于可数循环的过度优化必须等循环跑完才会进安全点，相当于省略了中间默认每秒1次的安全点。
+
+那么主线程为什么会等t1、t2进入安全点呢，HotSpot JVM 会在循环中添加一个safepoint 轮询，以便在 JVM 需要执行 stop the world 操作时暂停线程，但在这个例子里被消除了。
+safepoint 轮询不是免费的（也就是说，它有一些性能开销）。因此 JIT 编译器会在可能的情况下尝试消除它。于是等这两个慢线程循环完才进行到这次安全点的操作，开启下一次的操作。
+可数循环的问题其实可以常见的一个。
+
+对于ThreadSafePoint这个例子:
+1.你启动了两个长的、不间断的循环（内部没有安全点检查）。
+2.主线程进入睡眠状态 1 秒钟。
+3.在1000 ms（GuaranteedSafepointInterval）之后，JVM尝试在安全点停止，以便Java线程进行定期清理，但是直到计数循环完成后才能执行此操作。
+4.Thread.sleep 方法从 native 返回，发现安全点操作正在进行中，于是把自己挂起，直到操作结束。
+
+所以，从你的角度看起来、你观察到的就是：主线程正在等待循环完成。
+如果你想要保留 1000ms 的睡眠代码，那么就增加 JVM 参数 -XX:GuaranteedSafepointInterval=2000，则主线程也不必等待。
+
+具体分析可以通过添加JVM参数 -XX:+PrintSafepointStatistics 来打印相关的安全点操作
+三次进入安全点操作 非VM操作的类型 JVM延时开启偏向锁 非VM操作的类型
+```text
+         vmop                    [threads: total initially_running wait_to_block]    [time: spin block sync cleanup vmop] page_trap_count
+1.037: no vm operation                  [      13          2              3    ]      [ 39934     0 39934     0     0    ]  0   
+40.971: EnableBiasedLocking              [      13          0              0    ]      [     0     0     0     0     0    ]  0   
+40.972: no vm operation                  [      10          0              2    ]      [     0     0     0     0   329    ]  0   
+
+Polling page always armed
+EnableBiasedLocking                1
+    0 VM operations coalesced during safepoint
+Maximum sync time  39934 ms
+Maximum vm operation time (except for Exit VM operation)      0 ms
+```
+
+## VMThread与VM操作 
+VMThread 是 JVM 自身启动的一个内部线程，它主要用来协调其它线程达到安全点以及执行 VM 操作。  
+
+我们比较熟悉的 CMS 的初始标记和最终标记都是 VM 操作，又比如 thread dump，线程挂起以及偏向锁的撤销等等都是 VM 操作。VM 操作类型有很多，JVM 对应的源码在 vm_operations.hpp 定义的宏 VM_OPS_DO 里面。
+
+在loop()方法中， SafepointSynchronize::is_cleanup_needed() 就是判断 StubQueue 里面是否有 stub 缓存。在 JVM 正常运行的时候，如果设置了进入安全点的间隔，就会隔一段时间判断是否有代码缓存要清理，如果有，会进入安全点。
 
 
 ## TLAB

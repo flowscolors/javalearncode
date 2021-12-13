@@ -54,3 +54,20 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
 
 
 ## ConcurrentHashMap特点
+1.8以后使用节点锁代替1.7的分段锁操作。
+
+
+
+## 一些坑
+
+1.对于ConcurrentHashMap的方法，当 computeIfAbsent 的时候，里面还有一个 computeIfAbsent。并且这两个 computeIfAbsent 它们的 key 对应的 hashCode 是一样的。
+
+这时候会第二个进入computeIfAbsent的对象就进入死循环，无法出来。此bug在jdk 1.9被修复。对于1.85版本的jdk需要外部进行判断后调用该方法。
+
+先调用了 get 方法，如果返回为 null，则调用 putIfAbsent 方法，这样就能实现和之前一样的效果了。
+
+2.CHM 本身一定是线程安全的。但是，如果你使用不当还是有可能会出现线程不安全的情况。
+
+虽然 ConcurrentHashMap 是线程安全的，但是假设如果一个线程 put，一个线程 get，在某些代码的场景里面是不允许的，此时就需要在你自己的逻辑里使用synchronized 把几个操作封装成一个原子操作。
+因为外部的逻辑可能需要的是先get再set那就有问题了，因为这两个都是原子操作，类似Redis的set、get，两个合并起来的原子操作是incr。
+

@@ -31,20 +31,24 @@ https://segmentfault.com/a/1190000040050819
 ## 生产中遇到的OOM
 Caused by: java.lang.OutOfMemoryError: GC overhead limit exceeded
 
-### 1.数据库查询没有limit
-一次查询返回数据量太多，直接给后端干崩了，arraylist存不下，元素赋值时不允许。  
-一次拉取过多数据做本地缓存。  
+### 1.内存溢出 数据库查询没有limit
+* 一次查询返回数据量太多，直接给后端干崩了，arraylist存不下，元素赋值时不允许。虽然每次查出来的arraylist是会被GC，但问题是大部分service并不是查出来返回就结束。
+比如没加limit，offset，直接查了300w条数据，并且还对依次300w数据做操作，这个时候内存长时间不释放，full gc无法回收内存，直接OOM.
+  
+* 一次拉取过多数据做本地缓存。
+
+* 比如大量文本、视频，直接全量加载到内存处理。   
+
 总之都是大对象导致的GC。
 
-### 2.内存溢出
+### 2.内存泄漏
 一般是启动时不会发现，慢慢增加的，比如:
 * hashmap有put，没有remove。导致对象越来越大。
-* 
+* Threadlocal的value未remove导致的内存溢出
 
-### 3.加载大量文件到内存
-比如大量文本、视频，直接全量加载到内存处理。 
+客户端内部实现维护了map存对象，而内存泄漏导致最后老年代每次回收都回收不掉 OOM，需要找到对应溢出的地方解决。
 
-### 4.使用默认JVM参数
+### 3.使用默认JVM参数 踩了默认参数的坑
 JDK8默认老年代开启自动调整算法。来看一个实际的案例。
 在一个limit 2C2G的容器里面，没有配置有关jvm的启动参数，使用默认配置。查看jmap -heap配置
 ```text
@@ -64,11 +68,31 @@ Heap Configuration:
     G1HeapRegionSize     = 0
 ```
 
-MaxHeapSize 最大堆内存512MB，是因为读取了limit限制，拿了1/4当上限。
-MaxNewSize  最大新生代170.5MB，是因为读取了默认1/3的堆上限，新生代老年代1：2。
-MetaspaceSize 默认20.79MB,默认值。
-MaxMetaspaceSize 大metspaace上限175PB，因为拿的是虚拟内存的上限。
-GC回收器使用ParallOld，特点是会根据当前内存值进行堆内存的动态大小调节。
+MaxHeapSize 最大堆内存512MB，是因为读取了limit限制，拿了1/4当上限。  
+MaxNewSize  最大新生代170.5MB，是因为读取了默认1/3的堆上限，新生代老年代1：2。  
+MetaspaceSize 默认20.79MB,默认值。虽然实际上限很大，但是每次自己扩容还是会产生Full GC，如果程序有很多Class、常量池，还是先定一下大小，比如200M。  
+MaxMetaspaceSize 大metspaace上限175PB，因为拿的是虚拟内存的上限。  
+GC回收器使用ParallOld，特点是会根据当前内存值进行堆内存的动态大小调节。  
 
-### 5.大量反射代码导致老年代对象过多
+### 4.并发失败导致的GC退化 
+单次GC STW耗时4分钟。老年代的剩余空间已经不够同时晋升的区间时触发。 扩大老年代，减少回收比例
+
+
+### 5.ParNew Allocation Failure导致的GC问题
+普通的ParNew 回收空间小应该会很快回收完的，当大部分对象在新生代的时候也会触发提前晋升，所以此处的速度应该很块。  
+但是实际出现单次ParNew GC花了20s的情况，使用默认ParNew + CMS，原因是对象非常大并且跨越多个块。这意味着所有工作线程都必须多次扫描很长一段路才能找到对象的开头。这就是消耗时间并导致长时间 GC 暂停的原因。
+
+出现该情况时，jamp -heap Pid执行old gc，发现可以回收完，也就是说老年代并没有满。
+
+参考文档： 
+https://bugs.openjdk.java.net/browse/JDK-8079274
+
+### 6.可数循环的JIT优化导致GC时间过长
+可数循环会被JIT优化，中间的安全点检查会被跳过，最后才到安全点。导致其他线程就会在这次安全点检查中等待可数循环的任务执行完才进行后面的操作。  
+也即部分线程到达安全点、而一些特别慢的线程没有到达，导致先到达的会自旋等待，使用户线程长时间无响应。
+
+参考文档： 
+https://mp.weixin.qq.com/s/Imyo_cQ5OWdY9fY0Qz3nzw
+
+
 

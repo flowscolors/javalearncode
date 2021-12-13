@@ -36,7 +36,7 @@ Stream流是一个来自数据源的元素队列并支持聚合操作。有几�
 ## 2.Stream使用
 1.获得流。对于集合，在Java8中，集合接口有2个方法来生成流：
 * stream() 为集合创建串行流
-* parallelStream() 为集合创建并行流
+* parallelStream() 为集合创建并行流,并行流基于Fork-Join ThreadPool框架实现。
 ```text
 List<String> strings = Arrays.asList("abc", "", "bc", "efg", "abcd","", "jkl");
 List<String> filtered = strings.stream().filter(string -> !string.isEmpty()).collect(Collectors.toList());
@@ -117,3 +117,29 @@ List<UserEntity> users = new LambdaQueryChainWrapper<UserEntity>(userMapper)
 
 参考文档：  
 https://segmentfault.com/a/1190000039999504
+
+## 其他拓展的流式表达式方法
+LINQ是.net3.5的一种新特性，语言集成查询 (Language Integrated Query)，一种将自然的SQL语法拓展到高级语言的功能。开源有LINQ For Java  
+https://github.com/timandy/linq
+
+## 常见面试题
+Q:给你下面一个字符串数组 {"abb","abcd","fegc","efe","adfes"} ,如果用stream api来实现，找出以字符'a'开头长度最大的字符串，使用stream api该怎么实现呢？
+A:filter过滤以a开头的字符串 + mapToInt转化成int数组存字符串长度 + max找出数组中最大值 + orElse 若为null则置为0 
+```shell script
+public static void maxLength(List<String> list){
+    System.out.println(list.stream().filter(s -> s.startsWith("a")).mapToInt(r -> length(r)).max().orElse(0));
+    System.out.println(list.stream().filter(s -> s.startsWith("a")).max(Comparator.comparing(String::length).orElse(0));;
+}
+```
+
+Q:上面这个操作是这个操作是迭代一次还是迭代两次呢？
+A：这个filter+max是迭代一次完成，如果要是迭代多次，stream后面的操作函数很多的情况下效率会非常低。不过filter是一个无状态的中间操作，所以stream只需要处理一次。
+如果使用了有状态的中间操作算子，则会处理两次。如distinct(),limit(),skip(),sorted(),sorted()。
+
+Q:短路操作与非短路操作
+A:短路操作和非短路操作都是Stream的结束操作，结束操作是针对中间操作来说的。短路操作是指不用处理全部元素就可以结束，包括下面的方法：  
+anyMatch(),allMatch(),noneMatch(),findFirst(),findAny()  
+非短路操作是指需要处理所有元素才能结束，包括下面的方法：  
+forEach(),forEachOrdered(),toArray(),reduce(),collect(),max(),min(),count()
+
+

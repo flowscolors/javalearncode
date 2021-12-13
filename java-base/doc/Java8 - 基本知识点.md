@@ -13,8 +13,26 @@ https://zhuanlan.zhihu.com/p/350219671
 
 比如，往hashset里面add，首先会调用hashcode()得到hashcode，并根据hashcode值决定对象存储位置。hashset判断两个元素相等的标准是：
 1）两个对象通过调用equal()方法返回true 2）两个对象的hashcode方法返回值相等。
+所以如果你只重写了equal(),而没有重写hashcode()，每次put值的时候，你是想更新值的，结果却添加了值，循环几千次，就是多添加了前几千个对象，容易OOM。
 
 比如，String类中重写了hashCode()和equals()方法，用来比较指向的字符串对象所存储的字符串是否相等，所以"ABC","ABC"是不同的元素，无法插进一个set，但是equal相等。
+```shell script
+    public int hashCode() {
+        int h = hash;
+        if (h == 0 && value.length > 0) {
+            char val[] = value;
+
+            for (int i = 0; i < value.length; i++) {
+                h = 31 * h + val[i];
+            }
+            hash = h;
+        }
+        return h;
+    }
+```
+按String中的hashcode方法，对于任意两个字符串 xy 和 ab，如果它们满足 x-a=1，即第一个字符的 ASCII 码值相差为 1，同时满足 b-y=31，即第二个字符的 ASCII 码值相差为 -31。那么这两个字符的 hashCode 一定相等。Aa 和 BB 的 HashCode 是一样的。
+
+因此可以构造出hash冲突攻击，通过不断进行hash冲突。因为hashmap的扩容策略与树的高度有关，
 
 所以一般重写hashcode()方法的基本原则：
 * 在程序运行时，同一个对象的hashcode()方法返回值相同
@@ -49,6 +67,13 @@ final修饰类，表示类不可被继承。
 PS:对于上面的final修饰变量，一旦赋值不能被修改，对基础类型的是不能改了，但是对于对象、或者数组，是存的引用。修改对象、数组内容对引用是不会有影响的。
 如果想做到，对象的不可变性，就要像上面的String一样，只提供一个初始化的方法去构造变量，内部无其他办法修改。并且这个变量是private的，无法被外部修改，于是相当于生成了就不可变。  
 
+PS:并且更为重要的一点是final对并发的影响。加了fianl和不加final生成的是两套汇编代码，但是这并不是final的特性，而是JIT对fian的编译优化。
+“在 X86 处理器中，final 域的读/写不会插入任何内存屏障”,也即final不会像voliate一样生成汇编指令。   
+在 x86 处理器中，LoadStore、LoadLoad、StoreStore 都是 no-op，即无任何操作。  
+
+参考文档: 
+https://mp.weixin.qq.com/s/uXSVcXg4cxkiU2nE6b8gPQ
+http://gee.cs.oswego.edu/dl/jmm/cookbook.html
 
 ### 内部类
 https://www.cnblogs.com/dolphin0520/p/3811445.html

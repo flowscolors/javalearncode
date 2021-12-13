@@ -1,14 +1,17 @@
 ## 线程模型 OS、Java级别
 书接上文，计算机内存模型是一种解决多线程场景下的一个主存操作规范，既然是规范，那么不同的编程语言都可以遵循这种操作规范，在多线程场景下访问主存保证原子性、可见性、有序性。
-Java内存模型(Java Memory Model，JMM)即是Java语言对这个操作规范的遵循，JMM规定了所有的变量都存储在主存（Heap）中，每个线程都有自己的工作区（Stack），线程将使用到的变量从主存中复制一份到自己的工作区，线程对变量的所有操作(读取、赋值等)都必须在工作区，不同的线程也无法直接访问对方工作区，线程之间的消息传递都需要通过主存来完成。可以把这里主存类比成计算机内存模型中的主存，工作区类比成计算机内存模型中的高速缓存。
+Java内存模型(Java Memory Model，JMM)即是Java语言对这个操作规范的遵循，JMM规定了所有的变量都存储在主存（Heap）中，每个线程都有自己的工作区（Stack），
+线程将使用到的变量从主存中复制一份到自己的工作区，线程对变量的所有操作(读取、赋值等)都必须在工作区(也即栈帧中的局部变量表)，不同的线程也无法直接访问对方工作区，线程之间的消息传递都需要通过主存来完成。可以把这里主存类比成计算机内存模型中的主存，工作区类比成计算机内存模型中的高速缓存。
+
+可以说Java运行时模型的堆区、栈区、方法区就是建立在JMM基础上的。堆区存共享变量，栈区的局部变量表load共享变量、修改并回写回堆区(这部分回写实际使用的是OS的共享内存实现)。而OS的共享内存并不能保证顺序性和有序性，于是Java就要去解决了。
 
 而我们知道JMM其实是工作主存中的，Java内存模型中的工作区也是主存中的一部分，所以可以这样说Java内存模型解决的是内存一致性问题(主存和主存)而计算机内存模型解决的是缓存一致性问题(CPU高速缓存和主存)，这两个模型类似，但是作用域不一样，Java内存模型保证的是主存和主存之间的原子性、可见性、有序性，而计算机内存模型保证的是CPU高速缓存和主存之间的原子性、可见性、有序性。
 因为CPU只能解决缓存的问题，不能解决内存的问题，于是JMM Java内存模型，实际上是对Java多线程的线程一致性问题的解决，可以说是必然之路。
 
 ### JMM Java内存模型
-Java线程的所有操作都是在工作区进行的，那么工作区和主存之间的变量交互如下图。
+Java线程的所有操作都是在工作区进行的，那么工作区和主存之间的变量交互如下图。OS的共享内存使用。  
 ![](https://cdn.jsdelivr.net/gh/flowscolors/resources-backup@main/img_bed/Java内存模型交互图.JPG)
-Java通过几种原子操作完成工作区内存和主存的交互
+Java通过8种原子操作完成工作区内存和主存的交互，注意该规则已弃用，JSR-133中已放弃该描述，但JMM没有变。
 
 lock：作用于主存，把变量标识为线程独占状态。
 unlock：作用于主存，解除变量的独占状态。
@@ -34,7 +37,22 @@ JMM 有以下规定：
 
 （3） 主内存是由多个线程所共享的，但线程间不共享各自的工作内存，如果线程间需要通信，则必须借助主内存中转来完成。
 
+jvm屏障规范，以下这4种内存屏障是jvm的实现，具体记录在jsr-133，并非OS的内存屏障。/src/hotspot/share/runtime/orderAccess.hpp 
+具有以下类型的屏障为jvm的规范，具体的实现由jvm实现，jvm通过硬件级别的屏障实现，需要根据具体的CPU进行实现
 
+* LoadLoad屏障 对于这样的语句Load1;LoadLoad;Load2，
+在Load2及后续读取操作尧都区的数据被访问前，要保证Load1要读取的数据被读取完毕。
+
+* StoreStroe屏障 对于这样的语句Store1；StoreStore;Store2，
+在Store2及后续写入操作前，保证Store1的写入操作对其它处理器课件。
+
+* LoadStore屏障 对于这样的语句Load1;LoadStore;Store2,
+在Store2及后续写入操作被刷出前，保证Load1要读取的数据被读取完毕。
+
+* StoreLoad屏障 对于这样的语句Store1;StoreLoad;Load2，
+在Load2及后续所有读取操作执行前，保证Store1的写入对所有处理器可见。
+
+StoreLoad Barriers同时具备其他三个屏障的效果，因此也称之为全能屏障（mfence），是目前大多数处理器所支持的；但是相对其他屏障，该屏障的开销相对昂贵。
 
 ### OS线程模型
 
@@ -75,8 +93,29 @@ Happens-before 关系是用来描述和可见性相关问题的：如果第一�
 >Future：Future 有一个 get 方法，可以用来获取任务的结果。那么，当 Future 的 get 方法得到结果的时候，一定可以看到之前任务中所有操作的结果，也就是说 Future 任务中的所有操作 happens-before Future 的 get 操作。
 >线程池：要想利用线程池，就需要往里面提交任务（Runnable 或者 Callable），这里面也有一个 happens-before 关系的规则，那就是提交任务的操作 happens-before 任务的执行。
 
+## happen-before 规则实现
+happen-before实际的实现是由JVM、JIT、OS、CPU共同实现的，而具体实现其实依赖OS提供的内存屏障功能。
+简单来说默认情况下Java多线程的执行逻辑是基于共享内存把堆区变量在栈帧的临时变量表中修改，因此会有并发问题。而在happen-before中使用单线程、volatile、join时，JVM会给你加上loadload、loadstore、storestore等内存屏障来保证顺序性。
+
+参考文档：
+http://gee.cs.oswego.edu/dl/jmm/cookbook.html
 
 
+## 内存屏障实现
+不同服务器对内存屏障的实现不同，x86并没有实现全部的内存屏障。
+ /arch/x86/include/asm/barrier.h
+“读屏障” 对一个对象引用进行读操作之前或之后附加执行的逻辑，相当于为引用读取挂上的一小段钩子代码。
+lfence：load | 在lfence指令前的读操作当必须在lfence指令后的读操作前完成。   lfence指令实现了Load Barrier，相当于LoadLoad Barriers。  
+
+“写屏障” 对一个对象引用进行写操作（即引用赋值）之前或之后附加执行的逻辑，相当于为引用赋值挂上的一小段钩子代码。  
+sfence：store | 在sfence指令前的写操作当必须在sfence指令后的写操作前完成。  sfence指令实现了Store Barrier，相当于StoreStore Barriers。  
+例：HotSpot通过写屏障来维护卡表。写屏障就是在将引用赋值写入内存之前，先做一步mark card——即将出现跨代引用的内存块对应的卡页置为dirty。
+
+"读写屏障"  mfence：mix | 在mfence指令前的读写操作当必须在mfence指令后的读写操作前完成。   mfence指令实现了Full Barrier，相当于StoreLoad Barriers。  
+
+Lock前缀，Lock不是一种内存屏障，但是它能完成类似内存屏障的功能。Lock会对CPU总线和高速缓存加锁，可以理解为CPU指令级的一种锁。
+用来修饰当前指令操作的内存只能由当前CPU使用，若指令不操作内存仍然由用，因为这个修饰会让指令操作本身原子化，而且自带Full Barrior效果；还有指令比如IO操作的指令、exch等原子交换的指令，任何带有lock前缀的指令以及CPUID等指令都有内存屏障的作用。
 
 
-
+参考文档： 
+https://sbexr.rabexc.org/latest/sources/55/b70e0cd908b742.html
