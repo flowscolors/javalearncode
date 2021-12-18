@@ -15,7 +15,7 @@ InetSocketAddress
 Socket
 socket.getOutputStream().write()
 socket.getOutputStream().flush()
-socket.getInputStream().read()
+socket.getInputStream().read()  
 
 ServerSocket
 Socket socket = serverSocket.accept();

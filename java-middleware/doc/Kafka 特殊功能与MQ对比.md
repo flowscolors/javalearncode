@@ -1,9 +1,46 @@
+
+## 1.Kafka如何保证消息不丢
+首先如果丢数据，那可能出现在三个地方。生产者、Broker、消费者，都可能丢。
+
+Producer
+为了提升效率，减少IO，producer在发送数据时可以将多个请求进行合并后发送。被合并的请求会一线缓存在本地buffer中。
+
+Broker
+Kafka为了得到更高的性能和吞吐量，将数据异步批量的存储在磁盘中。消息的刷盘过程，为了提高性能，减少刷盘次数，kafka采用了批量刷盘的做法。
+所以Broker是可能丢数据的，但是Producer可以和Broker通过ack机制进行协调，一旦producer发现broker消息丢失，即可自动进行retry。
+
+Comsumer
+Consumer的消费方式主要分为两种：
+* 自动提交offset，Automatic Offset Committing
+* 手动提交offset，Manual Offset Control
+如果使用自动提交，则Consumer自动提交的机制是根据一定的时间间隔，将收到的消息进行commit。commit过程和消费消息的过程是异步的。也就是说，可能存在消费过程未成功（比如抛出异常），commit消息已经提交了。此时消息就丢失了
+所以一般建议开启手动提交。
+
 ## 1.Kafka如何保证消息顺序消费
-1.Kafka保证partion有序，那你一个topic设一个partion即可。（为了顺序读写，这是肯定的）  
-2.Kafka发送时可以指定partion，那你使用key保证所有对象发一个partion即可。
+为了保证全局有序，则要做的东西太多了：
+1.生产者要保证发往partion有序，但是这要求生产者的也很多，比如retries机制就有可能导致顺序反了。
+1.Server端的partion只能设置一个，用partion的有序性保证存储的有序。但是partion设置为1，会导致消费者组功能失效。
+2.消费者按序接受，只能设置一个消费者，并且单个消费者消费时也不能开多线程消费，否则可能会先消费后面的消息。
+
+
+保证局部有序，就可以少做一些了，但是就和业务有关了：
+即把部分需要有序的消息放到一个partion，比如把各种资源对象放到不同partition。因为这部分数据是不同的。这种是按照业务把全局有序变成全局有序。
+
+
+如果业务可以做进一步的改造，那Kafka就可以做更少了：
+比如其实并不需要完全顺序性，
 
 ## 2.Kafka怎么保证不重复消费
 
+如果业务不做改造，仅由Kafka做：
+业务需要数据 Exactly Once，在早期的 Kafka 版本中只能在下游去重，现在引入了个幂等性，意思就是无论生产者发送多少个重复消息，Server端只会持久化一条数据，
+
+At Least Once + 幂等性 = Exactly Once
+
+启动幂等性，在生产者参数中 enable.idompotence= true，开启幂等性的生产者在初始化时候会被分配一个PID，发送同一个Partition的消息会附带Sequence Number，
+Broker会对做缓存，以此来判断唯一性。但是如果PID重启就会发生变化，同时不同partition也具有不同的主键，幂等性无法保证跨分区会话的 Exactly Once。
+
+如果业务可以改造，那就简单些。比如所有消息有版本号，每次消费完成更新数据库版本号。第二次重复消息来，比对版本号，一致或较小则抛弃该消息。
 
 ## 3.Kafka怎么做事务消息
 1.官方文档不提供  
