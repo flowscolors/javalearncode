@@ -127,3 +127,10 @@ A:重写父类的synchronized时，主要分为两种情况。1.子类方法没�
 Q:实际代码中怎么使用synchronized？
 A:synchronized同步的范围是越小越好。因为若该方法耗时很久，那其它线程必须等到该持锁线程执行完才能运行。所以实际是一般同步代码块。
   而synchronized代码块部分只有这一部分是同步的，其它的照样可以异步执行，提高运行效率。
+
+Q:synchronized是公平锁吗？
+A:
+
+Q:选synchronized还是ReentrantLock？
+A:ReentrantLock 确实功能更加强大(公平、可定时、可轮询、可中断)，但是危险性也更高，如果忘记在finally中调用unlock则问题会很大。
+一般在synchronized 无法满足需求的情况下，ReentrantLock 作为一种高级工具使用。

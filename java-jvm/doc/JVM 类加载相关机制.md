@@ -32,5 +32,15 @@
 SPI机制，jdbc的使用，其实就是bootstrop类要去加载第三方的类。于是引入了线程上下文委托机制。
 
 
+## 常见面试题
+Q:双亲委派机制的作用？
+  
+Q:Tomcat的classloader结构
+
+Q:如何自己实现一个classloader打破双亲委派
+
+Q:Tomcat热部署，热加载,怎么做到的？
+
+
 参考文档：  
 https://www.jianshu.com/p/aa6d1c32d104

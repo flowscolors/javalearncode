@@ -860,3 +860,6 @@ https://mp.weixin.qq.com/s/A1bZJlhgUnhHcxURhv_--w
 https://www.linuxidc.com/Linux/2018-02/150798.htm
 https://juejin.cn/post/6995156191286394888
 https://www.infoq.cn/article/bpwrqge-tuubmmz5rqtc
+
+https://github.com/farmerjohngit/myblog/issues/12
+https://github.com/farmerjohngit/myblog/issues/13

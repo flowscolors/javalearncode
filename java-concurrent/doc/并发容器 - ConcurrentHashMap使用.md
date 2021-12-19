@@ -56,6 +56,8 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
 ## ConcurrentHashMap特点
 1.8以后使用节点锁代替1.7的分段锁操作。
 
+1.7的分段锁，每把锁只锁数组中的一段数据，默认分0-15，一共16段。拿的是ReentrantLock当锁。
+
 
 
 ## 一些坑
@@ -71,3 +73,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
 虽然 ConcurrentHashMap 是线程安全的，但是假设如果一个线程 put，一个线程 get，在某些代码的场景里面是不允许的，此时就需要在你自己的逻辑里使用synchronized 把几个操作封装成一个原子操作。
 因为外部的逻辑可能需要的是先get再set那就有问题了，因为这两个都是原子操作，类似Redis的set、get，两个合并起来的原子操作是incr。
 
+## 常见面试题
+Q:ConcurrentHashMap是如何在保证并发安全的同时提高性能？
+
+Q:ConcurrentHashMap是如何让多线程同时参与扩容？

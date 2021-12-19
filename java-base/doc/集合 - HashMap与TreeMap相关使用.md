@@ -85,7 +85,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         return null;
     }
     
-    //扩容操作
+    //扩容操作  扩容时新的长度会被用来计算位与操作确定元素在数组中新的位置。所以元素要么保持不变，要么移动2次幂个位置。
     final Node<K,V>[] resize() {
         Node<K,V>[] oldTab = table;
         int oldCap = (oldTab == null) ? 0 : oldTab.length;
@@ -211,10 +211,28 @@ https://www.shuzhiduo.com/A/rV57qYAGzP/
 https://www.zhihu.com/question/366679456
 
 ## hashmap并发的问题
-1.
+1.扩容时出现著名的环形链表异常，该问题在JDK1.8由头插改为尾插解决。1.7的头插在重新hash时会导致死循环。
 
 
-2.
+2.并发情况下脏读脏写。
 
 
 3.hashmap一定是线程不安全的吗？虽然本身是一个线程不安全的容器，但是如果使用场景只是只读，那就是线程安全的。
+
+
+## 常见面试题
+Q:hashmap如何解决hash冲突，为什么hashmap中的链表需要转成红黑树？
+
+Q：hashmap什么时候会触发扩容？
+
+Q:jdk1.8之前并发操作hashmap时为什么会有死循环的问题？
+
+Q:hashmap扩容时每个entry需要再计算一次hash吗？
+
+Q:hashmap的数组长度为什么要保证是2的幂？
+
+Q：如何用LinkedHashMap实现LRU？
+
+Q:如何用TreeMap实现一致性hash？
+
+Q:TreeMap的key对象为什么必须要实现Compare接口

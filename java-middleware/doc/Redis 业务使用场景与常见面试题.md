@@ -90,6 +90,37 @@ Pipeline的好处是可以将多次IO的往返时间缩短到一次，需要注�
 解决办法： 删除Redis原来的数据，重新添加就可以了，或者包路径变回去。
 
 
+## 常见面试题
+Q:redis性能为什么高?
+
+Q:单线程的redis如何利用多核cpu机器？
+
+Q:redis的缓存淘汰策略？
+
+Q:redis如何持久化数据？
+
+Q:redis有哪几种数据结构？
+
+Q:redis的集合有没有限制，限制是多少?
+
+Q:Redis 哈希表进行 rehash 的触发时机是什么？
+
+Q:redis集群有哪几种形式？
+
+Q:哨兵模式，选举过程，会有脑裂问题么？
+
+Q:有海量key和value都比较小的数据，在redis中如何存储才更省内存？
+
+Q:如何保证redis和DB中的数据一致性？
+
+Q:如何解决缓存穿透和缓存雪崩？
+
+Q:如何用redis实现分布式锁？
+
+
+
+
+
 参考文档：  
 https://www.infoq.cn/article/yquus2qnrybilgrquliv
 http://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E8%AF%B4%E9%80%8F%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/17%20%20%E5%A6%82%E4%BD%95%E5%BA%94%E5%AF%B9%20Redis%20%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%E3%80%81%E5%87%BB%E7%A9%BF%E5%92%8C%E9%9B%AA%E5%B4%A9%EF%BC%9F.md

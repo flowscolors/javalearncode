@@ -305,6 +305,19 @@ Netty的对JDK自带的NIO的API进行封装，解决上述问题，主要特点
 
 3） Reactor模式在IO读写数据时还是在同一个线程中实现的，即使使用多个Reactor机制的情况下，那些共享一个Reactor的Channel如果出现一个长时间的数据读写，会影响这个Reactor中其他Channel的相应时间，比如在大文件传输时，IO操作就会影响其他Client的相应时间，因而对这种操作，使用传统的Thread-Per-Connection或许是一个更好的选择，或则此时使用改进版的Reactor模式如Proactor模式。
 
+
+### 常见面试题
+Q:同步阻塞、同步非阻塞、异步的区别？
+
+Q:select、poll、eopll的区别？
+
+Q:java NIO与BIO的区别？
+
+Q:reactor线程模型是什么?
+
+
+
+
 参考文档：  
 https://tech.meituan.com/2016/11/04/nio.html
 https://www.cnblogs.com/crazymakercircle/p/9833847.html

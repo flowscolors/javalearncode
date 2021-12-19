@@ -35,7 +35,8 @@ http://gee.cs.oswego.edu/dl/papers/aqs.pdf
 2.线程的阻塞和解除阻塞  tryacquire、tryrelease
   
    这部分对指定线程阻塞、解除阻塞的能力也是共性的。对应锁的获取、释放方法。  
-   获取和释放相关的重要方法，这些方法是协作工具类的逻辑的具体体现，需要每一个协作工具类自己去实现，所以在不同的工具类中，它们的实现和含义各不相同。 
+   获取和释放相关的重要方法，这些方法是协作工具类的逻辑的具体体现，需要每一个协作工具类自己去实现，所以在不同的工具类中，它们的实现和含义各不相同。
+   并且对于锁，有的线程只是想快速尝试获取一下锁，获取不到也没关系，它会进行其他处理（tryacquire），而有的线程则一定要获取到，没获取也愿意等(acquire 进队列). 
    
    
 3.队列的管理 CLH  acquire、release
@@ -49,6 +50,8 @@ http://gee.cs.oswego.edu/dl/papers/aqs.pdf
    
    整体除了state的CAS，当执行release时，会通过tryRealse去判断锁是否应该释放。如果tryrealse返回true。实际的acquire、release，中间会使用LockSupport的LockSupport的park、unpark，实际调用unsafe方法进行putObject。
    则判断头结点不为空并且头结点的waitStatus不是初始化节点情况，解除等待队列中线程挂起状态，让队列中线程开始竞争state。
+   
+   ![](https://cdn.jsdelivr.net/gh/flowscolors/resources-backup@main/img_bed/AQS-CLH.JPG)
    
 那么综上，我们以朴素的价值观得出，"AQS 是一个用于构建锁、同步器等线程协作工具类的框架"这件事。
 
@@ -99,7 +102,7 @@ static final class Node {
     
         volatile Node next;                  //链接到当前线程的后继节点，可以用来检查后继的waitStatus值
 
-        volatile Thread thread;             //使用这个节点入队的线程，也即该节点对应的任务，构造时初始化，出队时置为null
+        volatile Thread thread;             //使用这个节点入队的线程，也即该节点对应的任务，构造时初始化，出队时置为null           
     
         Node nextWaiter;                    //链接到下一个等待条件的节点。仅独占模式下才能访问到队列
     
@@ -192,7 +195,7 @@ static final class Node {
             return Thread.interrupted();
     }                                           //park然后检查是否中断的便捷方法
     
-    //各种版本的锁获取方法
+    //各种版本的锁获取方法 如果当前线程所有节点是头节点后一个，则自旋获取锁，其他线程则挂起，这样保证只有一个线程自旋，减少CPU空转。
     final boolean acquireQueued(final Node node, int arg) {
         boolean failed = true;                            // 标记是否成功拿到资源
         try {
