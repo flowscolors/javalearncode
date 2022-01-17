@@ -3,7 +3,25 @@
 ## Redis 命令行使用
 
 ```shell script
+#单个键管理
+set hello world
+set java jedis
+
+exist java
+del java
+expire hello 10
+ttl hello
+type hello
+object encoding hello
+
+set ex
+set nx
+set px
+set xx
+
+---------------------------------------------------------------
 set college szu
+# h对应批量命令 
 
 hset person name bingo
 hset person age 20

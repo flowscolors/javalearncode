@@ -3,6 +3,7 @@
 Spring的核心功能就是Bean管理，关于Bean定义了很多可拓展性的接口，通过拓展性接口可以实现很多功能。
 比如:动态创建Bean、延迟动态创建Bean、动态注入Bean、动态修改Bean。实际Spring自己的AOP Session等功能都是基于这些扩展接口实现的。
 
+## Spring拓展点
 ### 1.BeanFactory接口
 不需要自己实现接口方法，直接调用该接口方法即可。但首先要获得BeanFactory这个对象，可以用下面的Aware方法获得。
 
@@ -126,3 +127,23 @@ https://cloud.tencent.com/developer/article/1486121
 https://segmentfault.com/a/1190000019786880
 https://blog.csdn.net/woheniccc/article/details/80047226
 https://www.cnblogs.com/myitnews/p/14017642.html
+
+## SpringBoot拓展点
+SpringBoot可以使用各种注解进行拓展了。
+@EnableAutoConfiguration 保证自动化配置，配置好类文件地址即可。
+
+SpringApplicationRunListener 在整个启动流程中，作为监听者接受不同执行点的事件通知。直接获取到使用即可。
+
+ApplicationContextInitializer 对ApplicationContext进行处理。
+
+CommandLineRunner 在Spring加载之后，SpringBoot完成初始化之后执行，可以认为是main方法的最后一步。属于SpringBoot应用特定的回调拓展接口。
+
+
+
+
+
+
+
+
+
+

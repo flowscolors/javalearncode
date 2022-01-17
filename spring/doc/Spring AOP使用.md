@@ -20,11 +20,14 @@ AOP 采取横向抽取机制（动态代理），取代了传统纵向继承机�
 名称	说明
 Joinpoint（连接点）	指那些被拦截到的点，在 Spring 中，指可以被动态代理拦截目标类的方法。
 Pointcut（切入点）	指要对哪些 Joinpoint 进行拦截，即被拦截的连接点。
+    execute(public * * (..)) 任意公共方法的执行
+    execute(* set* (..))     以set开始的方法的执行
+    execute(* com.xyz.service.*.* (..))     定义service包里任意方法的执行
 Advice（通知）	指拦截到 Joinpoint 之后要做的事情，即对切入点增强的内容。
 Target（目标）	指代理的目标对象。
 Weaving（植入）	指把增强代码应用到目标上，生成代理对象的过程。
 Proxy（代理）	指生成的代理对象。
-Aspect（切面）	切入点和通知的结合。
+Aspect（切面）	切入点和通知的结合。 @Aspect定义一个Java类为切面类。
 Advice 直译为通知，也有的资料翻译为“增强处理”，共有 5 种类型，如下表所示。
 
 通知	说明

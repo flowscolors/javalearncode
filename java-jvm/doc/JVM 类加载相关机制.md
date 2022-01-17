@@ -4,9 +4,9 @@
 
 ## 2.JDK默认classload
 默认三种classload：
-* Bootstrop Classload  C++语言编写，jvm启动后初始化，加载%JAVA_HOME%/jre/lib,Xbootclasspath中类
-* ExtCLassLoad  java语言编写，主要加载 %JAVA_HOME%/jre/lib/ext  
-3.AppClassLoad  java语言编写，主要加载ClassPath下的类
+* BootstropClassload 启动类加载器，C++语言编写，jvm启动后初始化，加载%JAVA_HOME%/jre/lib,Xbootclasspath中类
+* ExtCLassLoad  拓展类加载器，java语言编写，主要加载 %JAVA_HOME%/jre/lib/ext  
+* AppClassLoad  应用程序类加载器，java语言编写，主要加载ClassPath下的类
 
 ## 3.双亲委托机制
 
@@ -29,8 +29,13 @@
 
 ## 5.不遵循双亲委托的场景
 
-SPI机制，jdbc的使用，其实就是bootstrop类要去加载第三方的类。于是引入了线程上下文委托机制。
+SPI机制，jdbc的使用，Tomcat使用其实就是bootstrop类要去加载第三方的类。于是引入了线程上下文委托机制。
 
+Tomcat可以运行不同应用程序，当在一个Tomcat中不同应用需要使用同一个包的不同版本时，如果还使用双亲委派机制就会出问题。
+于是Tomcat使用了自己的类加载机制，有共享包的Common ClassLoad，有每个应用私有的WebApp ClassLoad，各个项目就是使用各自的Web ClassLoad加载进Tomcat容器的。
+
+Tomcat的加载可以解决不同应用使用同一个包的不同版本，而当一个应用需要使用同一个包的不同版本时，比如一个程序即需要mysql 8的客户端，又需要mysql 5的客户端。
+那么解决这个问题就需要应用自己定义类加载器了。
 
 ## 常见面试题
 Q:双亲委派机制的作用？
