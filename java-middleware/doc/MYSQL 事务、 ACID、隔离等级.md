@@ -62,5 +62,6 @@ https://www.cnblogs.com/jpfss/p/9151698.html
 
 https://www.zhihu.com/question/266467051
 
+PS:查询会加锁吗，一般不会，而串行化等级下，查询是会加锁的。
 ### 事务实际使用案例
 

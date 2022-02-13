@@ -21,30 +21,41 @@ Q:Kafka是推模型还是拉模型？
 拉
 
 Q:Kafka如何保证高可用的？
-多broker
+多broker，partion的分片机制、主从机制。
 
 Q:Kafka如何保证高吞吐的？
 零拷贝、批量压缩发送、WAL、
 
 Q:Kafka的消息是有序的吗？
+A:对于单partition的消息是有序的。
 
 Q:Kafka的消息局部顺序是如何保证的?
+A:单partition顺序写入。
 
 Q:Kafak事务消息的实现机制？
+A:引入事务协调器 Transaction Coordinator 运行在 Kafka 服务端。
+
+Producer 在使用事务功能，必须先自定义一个唯一的 transaction id。有了 transaction id，即使客户端挂掉了，它重启后也能继续处理未完成的事务。
+
+Kafka 实现事务需要依靠幂等性，而幂等性需要指定 producer id 。所以Producer在启动事务之前，需要向 TC 服务申请 producer id。TC 服务在分配 producer id 后，会将它持久化到事务 topic。
 
 Q:Kafka会有重复消费的问题吗？如何解决？
 yes，客户端幂等
 
 Q:Kafak支持什么级别的延迟消息？如何实现的？
-
+A:默认自己不支持，需要自己使用几种方案进行自定义。
 
 ---
 Q:Kafak Consumer的负载均衡是怎么样的？
 消费者组，注意和Partition关系。
 
-Q:Kafka重平衡，重启服务怎么保证kafka不发生重平衡？有什么方案？
 
 Q:kafka重平衡，重启服务怎么保证kafka不发生重平衡？有什么方案？
+Rebalance 影响 Consumer 端 TPS。在 Rebalance 期间，Consumer 会停下手头的事情，什么也不能做。
+Rebalance 很慢。如果你的 Group 下成员很多，需要停机很久
+Rebalance 效率不高。当前 Kafka 的设计机制决定了每次 Rebalance 时，Group 下的所有成员都要参与进来，而且通常不会考虑局部性原理，但局部性原理对提升系统性能是特别重要的。
+
+配置参数，增加容忍时间，保证重启之前之后的消费者组数目不变。
 
 Q:生产者和消费者消费速率不一致的问题？
 假设生产者生产速度过快，消费者如果全部接受就会OOM，一般有三种解决方式：
@@ -53,4 +64,4 @@ Q:生产者和消费者消费速率不一致的问题？
 
 
 Q:kafka怎么保证消息不丢失的
-
+A:没法保证不丢，只能生产者重试，服务端持久化，消费者手工确认offset。
