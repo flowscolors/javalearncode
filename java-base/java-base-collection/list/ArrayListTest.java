@@ -37,7 +37,7 @@ public class ArrayListTest {
         long timeStart = System.currentTimeMillis();
         while (i < DataNum) {
             int temp = list.size();
-            list.add(temp/2+"abcd");
+            list.add(temp/2,"abcd");
             i++;
         }
         long timeEnd = System.currentTimeMillis();

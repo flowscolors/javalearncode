@@ -17,5 +17,7 @@ public class ThreadLocalTest3 {
         });
         t.start();
         System.out.println("Main local: " + local.get());
+        local.set(200);
+        System.out.println("Main local: " + local.get());
     }
 }

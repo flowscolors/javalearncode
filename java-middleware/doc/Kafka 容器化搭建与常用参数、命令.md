@@ -8,7 +8,7 @@
 
 ## 2.常见需要修改的参数
 
-Consumer参数 
+### Consumer参数 
 https://github.com/apache/kafka/blob/2.8/clients/src/main/java/org/apache/kafka/clients/consumer/ConsumerConfig.java
 
 | 参数 | 默认值 | 推荐值 |说明 |
@@ -18,8 +18,23 @@ https://github.com/apache/kafka/blob/2.8/clients/src/main/java/org/apache/kafka/
 | connections.max.idle.ms | 600000 | 30000 |空连接的超时时间，设置为30000可以在网络异常场景下减少请求卡顿的时间。 |
 
 
+消费者负责订阅Kafka的主题Topic，并从订阅的Topic的主题上拉取消息。与其他一些消息中间件不同，有一层是消费者组。消费者组的概念提升了吞吐量，但是也引入了再均衡的问题。
+再均衡的问题在于，整个再均衡过程中，所有消费者都无法读取消息，这很致命。另一个问题在于分区被分配给新的消费者时，消费者当前状态会消失，如果当时未提交，会出现重复消费。
 
-Producer参数
+消费会被投递到订阅主题的消费者组的中的每一个消费者，但是注意不会重复投递，也即partition和消费者至多一一对应。消费者可以使用subscribe、unsubscribe，使用基于集合、正则、指定分区的订阅方式。
+注意使用subscribe方法订阅的主题具有消费者自动再均衡的功能，而使用assign方法订阅的分区则没有这个功能。
+
+Kafka的消费是基于拉取模式，需要客户端自己反复调用poll()方法，并返回offset。推荐使用带超时时间的poll()方法。
+
+消费者的消息类型是ComsumerRecord，其中类型除了key、value还有topic、partition、offset、timestamp、headers、checksum、序列化器等。
+
+消费者的客户端除了核心的消息拉取，还有消费位移、消费者协调器、组协调器、消费者选举、分区分配的分发、再均衡、心跳等功能。夏普非洲的offset提交之前是保存在zookeeper，现在是保存在内部的一个kafka主题_consumer_offset内。
+
+但问题的关键是消息的拉取的基于poll()犯法，而这个poll()方法对于开发人员是一个黑盒，无法精确掌握其消费的起始位置。而有时需要更细粒度的掌握，这时可以使用seek(),可以追前或回溯消息。
+
+KafkaConsumer 是非线程安全的。所以KafkaConsumer中定义了一个acquire()方法，用来检测是否当前只有一个线程在操作。KafkaConsumer的所有公用方法都会执行acquire()，除了wakeup()方法。
+
+### Producer参数
 https://github.com/apache/kafka/blob/2.8/clients/src/main/java/org/apache/kafka/clients/producer/ProducerConfig.java
 
 | 参数 | 默认值 | 推荐值 |说明 |
@@ -31,12 +46,24 @@ acks=0：表示producer不需要等待任何确认收到的信息，副本将立
 | retries | 0 | 结合实际业务调整 |客户端发送消息的重试次数。值大于0时，这些数据发送失败后，客户端会重新发送。注意，这些重试与客户端接收到发送错误时的重试没有什么不同。允许重试将潜在的改变数据的顺序，如果这两个消息记录都是发送到同一个partition，则第一个消息失败第二个发送成功，则第二条消息会比第一条消息出现要早。 |
 | request.timeout.ms | 结合实际业务调整 | 30000 |设置一个请求最大等待时间，超过这个时间则会抛Timeout异常。超时时间如果设置大一些，如127000（127秒），高并发的场景中，能减少发送失败的情况。 |
 
+max.request.size  生产者客户端能发送的消息的最大值。
+
+compression.type  用来指定消息的压缩方式，默认值为none。该参数可以配置为 gzip、snappy、lz4
+
+生产者发送的是消息体 ProducerRecord<K,V> 除了key，value其中还有topic、partition、headers、timestamps字段。其构造方法最简单的只需要Topic和value。当然你可以添加更多构造方法。
+
+生产者发送可以使用 发后即忘 send()、同步send().get()、异步 send(record,new Callback(@Override))
+
+KafkaProducer 是线程安全的，
 
 
-Topic参数
+### Broker参数
+message.max.bytes  该参数用来指定broker所能接受的消息的最大值，默认值约1M。如果Producer发送的消息大于这个参数，则Pruducer会报异常。注意如果需要改动这个值，那么还需要考虑
+                   max.request.size 客户端参数、max.message.bytes topic端参数，需要级联修改。
 
 
-
+重分配是Broker端的问题，当某个broker下线或宕机，其上所有分区不可用，会进行leader、follower的重分配，其基本原理是通过控制器为每个分区添加新副本，新的副本会copy所需的数据，由于需要网络IO进行传输，需要占用额外资源。
+可以使用相应脚本、broker端来实现复制限流。
 
 
 参考文档：  
@@ -82,3 +109,7 @@ topic使用规范
 
 参考文档：  
 https://support.huaweicloud.com/bestpractice-kafka/Kafka-client-best-practice.html
+
+## 生产者 - 分区器
+消息在通过send()发往broker的过程中，可能会经过拦截器、序列化器和分区器等一系列操作才能真正发往broker。当然其中序列化器是必须的。
+而分区器则是在ProduceRecord中partition为null时会使用，默认会对key进行hash来计算分区号。当然我们也可以使用自定义的分区器。

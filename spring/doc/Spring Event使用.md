@@ -57,6 +57,19 @@ You often won’t need to use application events, but it can be handy to know th
 我们不需要使用应用程序事件，但是很方便的知道他们存在，在SpringBoot内部使用各种事件来处理各种任务
 ```
 
+其次各类组件在集成到Spring中时也大量用到了Event。
+比如Netty整合Spring时，Netty服务启动后会阻塞线程，因此一般是新建线程去启动，而不会放在main方法中启动。而Netty启动后会使用容器中的Bean，于是要求Spring把所有Bean初始化完后去启动Netty。
+这种就需要监听器+Event去实现了。实现ApplicationListener<ContextRefreshedEvent>接口，在其onApplicationEvent()方法中启动Netty服务。
+
+
+
+
+
+
+
+
+
+
 
 
 参考文档：

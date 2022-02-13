@@ -3,7 +3,7 @@ Redis内部使用一个redisObject对象来标识所有的key和value数据，re
 
 ![](https://cdn.jsdelivr.net/gh/flowscolors/resources-backup@main/img_bed/Redis-object.JPG)
 
-字符串 type string  | encoding  raw/int
+字符串 type string  | encoding  raw/int/embstr
 对象   type object  | encoding
 字典   type hash
 列表   type list

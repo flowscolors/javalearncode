@@ -199,7 +199,8 @@ public V remove(Object key) {···}
 冲突：当两个对象的hashcode计算值相同，就产生了hash冲突，hashmap会先把冲突对象挂到一个链表上，当链表长度到8时且数组长度大于64时，会树化，红黑树。
 这里的链表阶段中，新的冲突对象插入链表在JDK7里是头插法，在JDK8里是尾插法。
 
-扩容:
+扩容:put的时候触发扩容，当  ++size > threshold （threshold 为数组长度 * 散列因子） 时触发扩容，直接*2。
+因为实际数组就是hash表，如果冲突过多会影响存取效率，所以扩容是当冲突过多时需要实现的。
 
 
 缩容: 无。 也正是因为Java的hashmap无缩容的机制，所以可能出现大量数据入队出队后，留下很多空的node节点。
@@ -222,17 +223,49 @@ https://www.zhihu.com/question/366679456
 
 ## 常见面试题
 Q:hashmap如何解决hash冲突，为什么hashmap中的链表需要转成红黑树？
+A:hashmap是使用链地址法解决，链表转红黑树是为了提高存取效率，因为理想的hash表存、取、读是O(1)。hashmap的树化需要数组长度到64，并且链表长度大于8.
+实际Java中还是有其他的hash表使用其他方式解决hash冲突，比如ThreadLocal中的ThreadLocalMap就是一个hash表，其中使用重hash的方法解决冲突。
 
 Q：hashmap什么时候会触发扩容？
+A：需要扩容是因为当存取元素过多，会影响存取效率。触发是++size > threadsold时会触发，即大于 数组长度 * 负载因子。
 
 Q:jdk1.8之前并发操作hashmap时为什么会有死循环的问题？
+A:jdk1.8以前的hashmap的冲突解决链地址是用头插法，并发执行+重hash，会导致死循环。1.8以后使用尾插法规避了这个问题。
+
+参考文档： https://tech.meituan.com/2016/06/24/java-hashmap.html
 
 Q:hashmap扩容时每个entry需要再计算一次hash吗？
+A:需要，扩容了都需要再进行重hash。但是因为长度是2次幂，所以和原有位置相比，要么是不变，要么是位移 > 2。
+注意扩容是一个特别耗性能的操作，所以当程序员在使用HashMap的时候，估算map的大小，初始化的时候给一个大致的数值，避免map进行频繁的扩容。
 
 Q:hashmap的数组长度为什么要保证是2的幂？
+A:为了使用位运算来计算位移，方便扩容和重hash的计算。
 
 Q：如何用LinkedHashMap实现LRU？
+A:LinkedHashMap是HashMap的子类,在原有HashMap数据结构的基础上,它还维护着一个双向链表链接所有entry,这个链表定义了迭代顺序，通常是数据插入的顺序。
+LinkedHashMap单独维护了一个双向链表，用于记录元素插入的顺序。内含accessOrder属性则指明了进行遍历时是按照什么顺序进行访问,我们可以通过它的构造方法自己指定顺序。
+```shell script
+public class LRUCache<K,V> extends LinkedHashMap<K,V> {
+    
+  private int cacheSize;
+  
+  public LRUCache(int cacheSize) {
+      super(16,0.75f,true);
+      this.cacheSize = cacheSize;
+  }
+
+  /**
+   * 判断元素个数是否超过缓存容量，重写即可实现移除最旧的逻辑。
+   */
+  @Override
+  protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+      return size() > cacheSize;
+  }
+}
+```
 
 Q:如何用TreeMap实现一致性hash？
+A:简单的分区取余不满足分布式随时拓展的需要,保证可拓展性就是一致性hash。当然实际分片的时候还是需要分布式的hash操作。
 
 Q:TreeMap的key对象为什么必须要实现Compare接口
+A:因为TreeMap需要保证对象的顺序，而对对象的顺序比较就需要对象自己实现Compare接口。

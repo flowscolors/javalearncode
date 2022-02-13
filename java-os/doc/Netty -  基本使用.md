@@ -1,6 +1,9 @@
 
 Netty是 一个异步事件驱动的网络应用程序框架，用于快速开发可维护的高性能协议服务器和客户端。Netty是基于nio的，它封装了jdk的nio，让我们使用起来更加方法灵活。
 
+Netty做为底层通信框架，封装了对操作系统Socket的交互、并丰富了其功能性、解决拆包、粘包、分隔符切分、IO模型、心跳、空闲检查、拓展性等问题。
+
+有很多中间件都选择了netty来做底层通信组件，比如 SpringCloud Gateway、Kafka、Dubbo、RocketMQ，就是因为netty已经足够好用，高性能。
 
 ### Netty简单使用
 

@@ -4,12 +4,32 @@
 
 
 ## 2.MYSQL InnoDB 中的各种锁 
-* 乐观锁和悲观锁
+逻辑上的锁：
+* 乐观锁和悲观锁   
 确保在多个事务同时存取数据库中同一数据时不破坏事务的隔离性和统一性以及数据库的统一性，乐观锁和悲观锁是并发控制主要采用的技术手段。
 
 悲观锁 - 假定会发生并发冲突，屏蔽一切可能违反数据完整性的操作。在查询完数据的时候就把事务锁起来，直到提交事务（COMMIT）。实现方式：使用数据库中的锁机制。
 
 乐观锁 - 假设不会发生并发冲突，只在提交操作时检查是否违反数据完整性。在修改数据的时候把事务锁起来，通过 version 的方式来进行锁定。实现方式：使用 version 版本或者时间戳
+
+* MVCC 乐观锁的一种实现
+多版本并发控制（Multi-Version Concurrency Control, MVCC）是 InnoDB 存储引擎实现隔离级别的一种具体方式，用于实现提交读和可重复读这两种隔离级别。而未提交读隔离级别总是读取最新的数据行，要求很低，无需使用 MVCC。可串行化隔离级别需要对所有读取的行都加锁，单纯使用 MVCC 无法实现。
+
+MVCC 的思想是：
+
+保存数据在某个时间点的快照。写操作（DELETE、INSERT、UPDATE）更新最新的版本快照，而读操作去读旧版本快照，没有互斥关系，这一点和 CopyOnWrite 类似。
+脏读和不可重复读最根本的原因是事务读取到其它事务未提交的修改。在事务进行读取操作时，为了解决脏读和不可重复读问题，MVCC 规定只能读取已经提交的快照。当然一个事务可以读取自身未提交的快照，这不算是脏读。
+
+实际意义上的锁：
+1.Shared and Exclusive Locks 共享锁/读写锁
+2.Intention Locks            意向锁，并不会阻塞任何请求，只是用来表明自己的意图，InnoDB会自动加。
+3.Record Locks               记录锁，行锁，select ··· for update 锁的是索引中的记录。
+4.Gap Locks                  间隙锁，select···for update中where是范围时会使用，锁的是索引中的范围记录。
+5.Next-Key Locks             行锁与gap锁的一个组合锁，。在默认的REPEATABLE READ隔离级别下，InnoDB会使用next-key lock来作为默认的锁，并在gap lock部分提到的特定条件下，放开gap lock的限制从而退化为单纯的行锁。
+6.Insert Intention Locks
+7.AUTO-INC Locks
+8.Predicate Locks for Spatial Indexes
+
 
 * 行级锁和表级锁
 从数据库的锁粒度来看，MySQL 中提供了两种封锁粒度：行级锁和表级锁。
@@ -37,13 +57,6 @@ InnoDB 下的行锁、间隙锁、next-key 锁统统属于独享锁。
 
 意向锁是 InnoDB 自动加的，不需要用户干预。
 
-* MVCC
-多版本并发控制（Multi-Version Concurrency Control, MVCC）是 InnoDB 存储引擎实现隔离级别的一种具体方式，用于实现提交读和可重复读这两种隔离级别。而未提交读隔离级别总是读取最新的数据行，要求很低，无需使用 MVCC。可串行化隔离级别需要对所有读取的行都加锁，单纯使用 MVCC 无法实现。
-
-MVCC 的思想是：
-
-保存数据在某个时间点的快照。写操作（DELETE、INSERT、UPDATE）更新最新的版本快照，而读操作去读旧版本快照，没有互斥关系，这一点和 CopyOnWrite 类似。
-脏读和不可重复读最根本的原因是事务读取到其它事务未提交的修改。在事务进行读取操作时，为了解决脏读和不可重复读问题，MVCC 规定只能读取已经提交的快照。当然一个事务可以读取自身未提交的快照，这不算是脏读。
 
 * Next-key 锁
 Next-Key 锁是 MySQL 的 InnoDB 存储引擎的一种锁实现。
@@ -62,6 +75,7 @@ Next-key lock -它是 Record Lock 和 Gap Lock 的结合，不仅锁定一个记
 
 锁的实验：  
 https://weikeqin.com/2019/09/05/mysql-lock-table-solution/
+
 
 
 

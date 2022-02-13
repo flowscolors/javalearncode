@@ -4,7 +4,8 @@ ThreadLocal，此类提供线程局部变量。1.2版本的Java中就有了，�
 这些变量与普通变量不同，因为每个访问该变量的线程（通过其 * {@code get} 或 {@code set} 方法）都有自己的、独立初始化的变量副本。
 
 local还是那个local，并没有在每个线程产生local副本，只不过调用set方法的时候，将它与传入的值以键值对的形式，存储于每个线程内部持有的ThreadLocalMap对象里。
-ThreadLocal实现方式是各线程对共享的ThreadLocal实例进行操作，实际上是以该实例为键对内部持有的ThreadLocalMap对象进行操作。可以说ThreadLocal类只是提供了访问这个Map的接口。
+ThreadLocal实现方式是各线程对共享的ThreadLocal实例进行操作，实际上是以该实例为键对内部持有的ThreadLocalMap对象进行操作。
+可以说ThreadLocal类只是提供了访问这个Map的接口。可以把ThreadLocal当作一个工具类，用来操作每个Thread内部的ThreadLocalMap。
 
 所以整个Threadlocal的核心其实是ThreadLocalMap，并且这个hashmap底层是基于数组实现，内部是一个Entry数组，下标是通过基于对ThreadLocal对象的threadLocalHashCode计算得来。
 而实际存的对象Entry继承自WeakReference，其中key是对ThreadLocal的弱引用，ThreadLocal实际存的值为value。Entry(ThreadLocal<?> k, Object v)。  
@@ -20,6 +21,7 @@ ThreadLocal实现方式是各线程对共享的ThreadLocal实例进行操作，�
     
 3.存线程安全的变量，避免某些情况需要考虑线程安全必须同步带来的性能损失
 
+![](https://cdn.jsdelivr.net/gh/flowscolors/resources-backup@main/img_bed/并发包-threadlocal.png)
 
 ## ThreadLocal 内部方法
 需要注意几点的是:
@@ -111,7 +113,7 @@ ThreadLocal常用内部方法:
 
         private Entry[] table;     //Entry数组，需要调整大小。table.length 必须始终是 2 的幂
 
-        private int size = 0;      //Entry数组中的条目个数
+        private int size = 0;      //Entry数组中的条目个数TThr
 
         private int threshold;    //要调整大小的下一个大小值。 默认为 0
     
@@ -172,14 +174,3 @@ public class ThreadLocalTest {
 3.ThreadLocalMap是自己实现的类似HashMap的功能，当出现Hash冲突（通过两个key对象的hash值计算得到同一个数组下标）时，它没有采用链表模式，而是采用的线性探测的方法，既当发生冲突后，就线性查找数组中空闲的位置。
   所以当Entry[]数组较大时，这个性能会很差，所以建议尽量控制ThreadLocal的数量。
   
-
-## 常见面试题
-1.为什么ThreadLocal使用弱引用？
-虽然ThreadLocal是设置成弱引用，但其实堆栈中线程执行的时候是存在对threadlocal的强引用。而当线程任务执行完，就结束了对threadlocal的强引用，这时候说明thredlocal就没用了。  
-但是此时threadlocalmap中还是有key指向它，如果是默认的强引用，则无法进行GC。而使用弱引用，相当于让没用的threadlocal在下一次GC时被回收。
-
-
-
-
-参考文档：  
-https://mp.weixin.qq.com/s/7IijM60IVFMbr1WA3vhT-w

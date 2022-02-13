@@ -11,6 +11,10 @@ HotSpot作者发现的“大多数锁只会由同一线程并发申请”,于是
 
 在1.6之前的重量级锁，会有线程的唤醒和阻塞，该操作借助操作系统的系统调用使用，linux下就是利用pthread的mutex实现。系统调用就涉及用户态、内核态切换了。 
 
+在JEP 374JEP 374: Deprecate and Disable Biased Locking，中提议废弃偏向锁，大意是实际偏向锁是现在少有的场景中付出了巨大的代码实现。
+最终就是，JDK 15 之前，偏向锁默认是 enabled，从 15 开始，默认就是 disabled，除非显示的通过 UseBiasedLocking 开启。
+参考文档：
+https://www.zhihu.com/question/295194595/answer/999804696
 
 
 |  锁   | 触发情况  | 优点 | 缺点 | 适用场景 | 
