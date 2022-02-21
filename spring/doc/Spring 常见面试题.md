@@ -136,8 +136,18 @@ A:区别：
 
 Q:AOP的使用ASpect的增强方法的顺序
 A:注解上加@Order。
-  
 
+
+---
+Q:使用Spring遇到的一些问题？
+A:spring启动错误Singleton bean creation not allowed while the singletons of this factory are indestruction。
+出现原因：单例的bean在创建的时候，容器已经处于销毁阶段，生命周期不同，不允许再次创建生产Bean。
+线程A把一定任务放入线程池，然后返回。由于异步原因，任务提交给线程池后，线程A结束，开始销毁Bean容器。此时线程池中获取Bean的操作就会失败。
+此时需要同步，等线程池任务执行完再进行退出。由于一般的@Controller、@Service都是单例，生命周期很长，故不会遇到该情况。除非ApplicationContext.close()。
+
+参考文档：https://blog.csdn.net/chenwiehuang/article/details/101532591
+https://stackoverflow.com/questions/15017746/error-creating-bean-with-name-and-singleton-bean-creation-not-allowed
+https://www.standbyside.com/2018/12/05/bean-creation-not-allowed-exception/
 
 
 

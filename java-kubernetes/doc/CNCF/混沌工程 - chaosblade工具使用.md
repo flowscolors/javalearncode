@@ -37,4 +37,6 @@ https://github.com/chaosblade-io/chaosblade-exec-jvm/wiki/%E6%96%B0%E6%89%8B%E6%
 另外目前看来chaosblade还是有很多需要做的工作，比如agent安装容易失败，没有权限认证，前端代码未开源。  
 以及实际实验时，为了验证真正交易的成功率，是需要引入测试流量的，无论是测试的人发压还是导入部分脱敏的生产流量，基本要落地是一定要进行定制化的。
 
+以及实验结果的回显，基于prometheus实现，需要集成。
+
 
