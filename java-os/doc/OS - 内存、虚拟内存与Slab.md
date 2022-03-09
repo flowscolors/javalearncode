@@ -21,7 +21,7 @@ ps aux | awk '{mem += $6} END {print mem/1024/1024}'
 cat /proc/meminfo | grep Slab
 vmstat -s
 ```
-
+  
 ## 虚拟内存
 
 首先，对于计算机技术而言，"虚拟内存"指的是一种内存管理的技术方式，而不是某种实现或工具，如Swap。虚拟内存做为虚构的内存空间，可以映射到实际的物理空间，从而分配实际内存。
@@ -110,3 +110,12 @@ cat /proc/slabinfo
 
 参考文档:  
 https://www.bianchengquan.com/article/507165.html
+
+## Docker中的cpu_set和cpu_share
+CPU Manager支持两种Policy，分别为none和static，通过kubelet --cpu-manager-policy设置，默认为none。
+none: 为cpu manager的默认值，相当于没有启用cpuset的能力。cpu request对应到cpu share，cpu limit对应到cpu quota。
+static: 目前，请设置--cpu-manager-policy=static来启用，kubelet将在Container启动前分配绑定的cpu set，分配时还会考虑cpu topology来提升cpu affinity。
+
+cpu_set : 默认关闭，需要手动开启，kubelet 去指向绑核操作。数目为request中声明的整数大小。
+cpu_share : 默认的request值。CFS调度中的权重，一般来说，在条件相同的情况下，cpushare值越高的，将会分得更多的时间片。
+cpu_quota ： 默认的limit值。cfs_quota_us/cfs_period_us代表了该容器实际可用的做多的CPU核数。

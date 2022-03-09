@@ -2,7 +2,9 @@ package tree;
 
 import common.TreeNode;
 
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 /**
@@ -10,9 +12,20 @@ import java.util.Queue;
  * @date 2022-02-21 13:24
  */
 public class TreeProTravel {
-    public static void solution(){
-
+    public static List<Integer> solution(TreeNode root){
+        List<Integer> nodes = new LinkedList<Integer>();
+        dfs(root,nodes);
+        return nodes;
     }
+
+    public static void dfs(TreeNode root,List<Integer> nodes){
+        if(root!=null){
+            nodes.add(root.val);
+            dfs(root.left,nodes);
+            dfs(root.right,nodes);
+        }
+    }
+
 
     public static void solution2(){
 
@@ -51,6 +64,10 @@ public class TreeProTravel {
         treeNode2.right = treeNode5;
         treeNode3.left = treeNode6;
         travelTree(treeNode1);
-
+        System.out.println("===== After DFS ====");
+        List<Integer> result = solution(treeNode1);
+        for(Integer i : result){
+            System.out.println(i);
+        }
     }
 }

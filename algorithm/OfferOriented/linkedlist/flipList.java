@@ -11,13 +11,17 @@ import java.util.List;
 public class flipList {
 
     public static ListNode solution(ListNode head){
-        ListNode temp = new ListNode(0);
-        while(head!=null){
-            //
+        ListNode pre = null;
+        ListNode cur = head;
 
-            head = head.next;
+        while(cur!=null){
+            //三次位移 + 1次指向变更
+            ListNode next = cur.next;
+            cur.next = pre;
+            pre = cur;
+            cur = next;
         }
-        return head;
+        return pre;
     }
 
     public static  void travelList(ListNode head){
@@ -42,6 +46,7 @@ public class flipList {
         listNode4.next = listNode5;
         listNode5.next = listNode6;
         travelList(listNode1);
+        System.out.println("======= After Flip======");
         solution(listNode1);
         travelList(listNode1);
 
