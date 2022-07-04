@@ -1,23 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/algorithm/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/commonscenes/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/designpatterns/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/java-base/java-base-collection/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java-base/java-base-core/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java-base/java-base-stream/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/java-base/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/java-base/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java-concurrent/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java-jvm/java-jvm-gc/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java-jvm/samll-jvm/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/java-jvm/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/java-jvm/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java-kubernetes/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java-middleware/java-middleware-es/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java-middleware/java-middleware-kafka/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java-middleware/java-middleware-mysql/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java-middleware/java-middleware-netty/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java-middleware/java-middleware-redis/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/java-middleware/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/java-middleware/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java-os/java-netty/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/java-os/java-os-io/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java-os/java-os-net/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/java-os/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/java-os/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring/small-spring/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring/spring-bean/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springcloud/springcloud-eureka/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springcloud/springcloud-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/springcloud/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/springcloud/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>
 </project>
