@@ -6,28 +6,28 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="java-concurrent" />
-        <module name="java-netty" />
-        <module name="springcloud-eureka" />
-        <module name="designpatterns" />
+        <module name="java-kubernetes" />
         <module name="springcloud-gateway" />
-        <module name="java-os-io" />
+        <module name="java-middleware-kafka" />
+        <module name="commonscenes" />
+        <module name="designpatterns" />
+        <module name="small-spring" />
+        <module name="java-concurrent" />
         <module name="java-middleware-mysql" />
-        <module name="spring-bean" />
+        <module name="java-os-net" />
+        <module name="java-base-core" />
+        <module name="java-netty" />
+        <module name="java-middleware-netty" />
+        <module name="java-middleware-redis" />
+        <module name="springcloud-eureka" />
         <module name="java-base-stream" />
+        <module name="samll-jvm" />
+        <module name="spring-bean" />
         <module name="java-base-collection" />
         <module name="java-jvm-gc" />
-        <module name="java-middleware-redis" />
-        <module name="samll-jvm" />
-        <module name="commonscenes" />
-        <module name="java-middleware-netty" />
         <module name="java-middleware-es" />
-        <module name="java-os-net" />
+        <module name="java-os-io" />
         <module name="algorithm" />
-        <module name="java-middleware-kafka" />
-        <module name="small-spring" />
-        <module name="java-base-core" />
-        <module name="java-kubernetes" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

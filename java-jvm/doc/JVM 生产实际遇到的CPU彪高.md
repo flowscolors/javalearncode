@@ -9,3 +9,12 @@ top -Hp Pid
 printf '%x\n' Pid
 jstack Pid | grep Pid16
 ```
+
+## Docker进程的周期彪高
+每分钟触发一次的彪高，最开始的是推测因为ns GC的原因，但是实际触发彪高的主机的NS GC并没有很频繁，那就是靠日志查不出问题。  
+1.使用perf record -g；perf report记录CPU高的线程。
+
+参考文档:
+https://www.cnblogs.com/fadewalk/p/11184016.html
+
+2.需要使用火焰图看下热点。  

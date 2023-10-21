@@ -1,5 +1,5 @@
 
-ElasticSearch Java 客户端在 SpringBoot 项目中的基础使用使用。
+ElasticSearch Java 客户端在 SpringBoot 项目中的基础使用使用。实际配合curl命令的http请求就够了。
 
 参考资料: 
 https://www.elastic.co/cn/elasticsearch/

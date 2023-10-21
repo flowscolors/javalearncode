@@ -29,7 +29,9 @@ protected final boolean tryReleaseShared(int releases) {···} 释放共享锁�
 
 final void reducePermits(int reductions) {···}             减少证书个数
 
-final int drainPermits() {···}                             直接把证书个数减少到0
+public int drainPermits() {···}                             获取并返回所有立即可用的许可证，因为获得全部，相当于直接把证书个数减少到0
+
+public int availablePermits() {···}                         返回此信号量中可用的当前许可数
 
 
 static final class NonfairSync extends Sync {···}          非公平模式的Sync
@@ -74,10 +76,15 @@ public void acquire(int permits) throws InterruptedException {
 ```
 
 ## 特点
-不保证同步，保证互斥。
+1.不保证同步，保证互斥。
 
+2.release使用不当的坑。首先我们的release基本是写在finally里，但是当我们程序执行acquire时是可能抛出InterruptException的，此时也会执行finally。导致明明没有获取到许可证的线程，执行了 release 方法，而该方法导致许可证增加。
 
+这就是坑，就是你代码中的 BUG 潜伏地带。而且还非常的危险，你想你代码里面莫名其妙的多了几个“许可证”。就意味着可能又多于你预期的线程在运行。很危险。
+
+也即默认机制可能导致没有获取到许可证的线程，调用了 release 方法。修复办法有：1.catch异常后直接return 2.继承Semaphore并重写acquire release方法。
 
 
 参考文档：  
 https://www.cnblogs.com/crazymakercircle/p/13907012.html
+https://mp.weixin.qq.com/s/iObZKas_Xvin-DLG0pQ1Ew

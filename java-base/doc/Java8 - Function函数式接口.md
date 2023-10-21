@@ -1,7 +1,9 @@
 
-函数式接口，是指定义了一个抽象方法的接口。在Java8中接口已经可以有默认方式实现了，但是即使有了默认方法实现，只要有一个抽象方法就还是函数式接口。
+函数式接口，是指定义了一个抽象方法的接口。
+函数式接口在Java中是指：有且仅有一个抽象方法的接口。重要。
+在Java8中接口已经可以有默认方式实现了，但是即使有了默认方法实现，只要有一个抽象方法就还是函数式接口。
 
-一般使用方法是自己定义或者使用java默认的函数式接口 + 使用Lambda表达式实现该接口的实现
+一般使用方法是自己定义或者使用java默认的函数式接口 @FunctionalInterface标识，并且只包含一个抽象方法的接口 + 使用Lambda表达式实现该接口的实现
 ```text
 @FunctionalInterface
 interface GreetingService 
@@ -12,6 +14,15 @@ interface GreetingService
 GreetingService greetService1 = message -> System.out.println("Hello " + message);
 ```
 
+## 方法引用
+方法引用分为三种，方法引用通过一对双冒号:: 来表示，方法引用是一种函数式接口的另一种书写方式：
+* 静态方法引用，通过类名::静态方法名。如Interger::parseInt
+* 实例方法引用，通过实例对象::实例方法名。如str::substring
+* 构造方法引用，通过类名::new。如User::new
+
+通过方法引用，可以将方法的引用赋值给一个变量，通过赋值给Function，说明方法引用也是一种函数式接口的书写方式。
+
+Lambda表达式也是一种函数式接口，Lambda表达式一般自己提供方法体，方法引用则直接使用现有的方法。并且Lambda表达式要求接口仅有一个抽象方法。
 
 ## Java 8 中的新增的函数式接口
 Java 8 的 java.util.function 包中引入了一些新的函数式接口, 如 Predicate, Consumer 和 Function, 现在分别介绍这几个接口

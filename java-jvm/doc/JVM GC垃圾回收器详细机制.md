@@ -130,6 +130,31 @@ ZGC只有三个STW阶段：初始标记，再标记，初始转移。其中，�
 -Xlog:safepoint,classhisto*=trace,age*,gc*=info:file=/opt/logs/logs/gc-%t.log:time,tid,tags:filecount=5,filesize=5
 ```
 
+## 常见面试题
+Q:CMS GC回收分为哪几个阶段？分别做了什么事情？
+
+Q:CMS有哪些重要参数？
+
+Q:Concurrent Model Failure和ParNew promotion failed什么情况下会发生？
+
+Q:CMS的优缺点？
+
+Q:有做过哪些GC调优？
+
+Q:为什么要划分成年轻代和老年代？
+
+Q:年轻代为什么被划分成eden、survivor区域？
+
+Q:年轻代为什么采用的是复制算法？
+
+Q:老年代为什么采用的是标记清除、标记整理算法
+
+Q:什么情况下使用堆外内存？要注意些什么？
+
+Q:堆外内存如何被回收？
+
+Q:jvm内存区域划分是怎样的？
+
 
 参考文档：  
 https://wiki.openjdk.java.net/display/zgc/Main

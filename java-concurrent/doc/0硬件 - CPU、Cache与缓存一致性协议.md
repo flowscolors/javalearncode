@@ -23,6 +23,8 @@ SMP 指多个 CPU 对称工作，无主次或从属关系。各 CPU 共享相同
 
 从程序员的角度看，无论底层是 SMP 还是 NUMA，互连线都是有限的资源。写代码的时候，要考虑这一点避免使用过多的总线Bus资源。所以后面讨论到占用总线资源的操作，无论在SMP还是NUMA上都应该尽量避免。  
 
+但是不同的数据结构在不同的CPU互联方式中可能有差异，比如Java锁的核心AQS的等待队列CLH，在NUMA系统结构下性能就会比较差。在SMP系统中很有效。解决NUMA系统结构的思路是MCS队列锁。
+
 ### CPU功能：  
 每个CPU的计算过程：
 取指 -> 解码 -> 执行 -> 写回  
@@ -97,6 +99,15 @@ TTASLock 的 LOCKED.get(this) 仅仅是一次本地自旋。仅检查处理器�
 可视化链接：
 https://www.scss.tcd.ie/Jeremy.Jones/VivioJS/
 https://www.scss.tcd.ie/Jeremy.Jones/VivioJS/caches/MESIHelp.htm
+
+
+### 前端 - 缓存行对于性能的影响
+缓存行对代码性能带来的影响。因为volatile 的写入操作，因为这个写入是会使得各个层级的 cache 都失效，然后写入内存的，因此相比直接写入肯定是慢的.
+
+waiting code
+
+参考文档： 
+https://rain.baimuxym.cn/article/18
 
 ### 后端 - ALU
 这里ALU计算单元实际也是并行执行，所以可能会乱序。这就会带来指令重排的问题。

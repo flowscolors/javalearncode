@@ -1,3 +1,11 @@
+
+流式表达式的添加是为了解决Java8：向方法传递代码的简洁技巧（方法引用、Lamdba）和接口中的默认方法。
+它提供了一种新的方式，能够简洁的表达行为参数化，采用这种编程技巧，代码更短，更清晰，也比常用的复制粘贴更少出错。
+
+可读性已经是大型项目不可或缺的一个特性，Java8演进的三个趋势就是利用并行、编写更简洁代码、以及对大型系统的设计方式支持的功能。
+
+并且声明式语言，将迭代和优化放在内部，从而使提供者可以进行内部优化。
+
 ## 1.Stream概览
 
 当我对于一个关系型数据库进行查询时，传入where参数我可以很方便的进行查询。但是当我查Redis中数据，想进行范围查询就很困难。
@@ -32,11 +40,13 @@ Stream流是一个来自数据源的元素队列并支持聚合操作。有几�
 * 与之前的Collection操作不同， Stream操作的所有中间操作都是返回流，因此可以实现延迟操作、短路操作。
 * 以前对集合遍历都是通过Iterator或者For-Each的方式, 显式的在集合外部进行迭代， 这叫做外部迭代。 Stream提供了内部迭代的方式， 通过访问者模式(Visitor)实现。
 
+另外注意流只能遍历一次，遍历完之后，流就被消费完了，可以从原始数据中再获得一份流，但把原来的流重新执行一遍会报错。
 
 ## 2.Stream使用
+流的使用一般包括三件事：一个数据源、一个中间操作链（形成一条流的流水线）、一个终端操作（执行流水线并生成结果）。
 1.获得流。对于集合，在Java8中，集合接口有2个方法来生成流：
 * stream() 为集合创建串行流
-* parallelStream() 为集合创建并行流
+* parallelStream() 为集合创建并行流,并行流基于Fork-Join ThreadPool框架实现。注意这里需要你的代码的多副本可以独立工作时才能得到正确结果，并且性能不一定更优。
 ```text
 List<String> strings = Arrays.asList("abc", "", "bc", "efg", "abcd","", "jkl");
 List<String> filtered = strings.stream().filter(string -> !string.isEmpty()).collect(Collectors.toList());
@@ -117,3 +127,29 @@ List<UserEntity> users = new LambdaQueryChainWrapper<UserEntity>(userMapper)
 
 参考文档：  
 https://segmentfault.com/a/1190000039999504
+
+## 其他拓展的流式表达式方法
+LINQ是.net3.5的一种新特性，语言集成查询 (Language Integrated Query)，一种将自然的SQL语法拓展到高级语言的功能。开源有LINQ For Java  
+https://github.com/timandy/linq
+
+## 常见面试题
+Q:给你下面一个字符串数组 {"abb","abcd","fegc","efe","adfes"} ,如果用stream api来实现，找出以字符'a'开头长度最大的字符串，使用stream api该怎么实现呢？
+A:filter过滤以a开头的字符串 + mapToInt转化成int数组存字符串长度 + max找出数组中最大值 + orElse 若为null则置为0 
+```shell script
+public static void maxLength(List<String> list){
+    System.out.println(list.stream().filter(s -> s.startsWith("a")).mapToInt(r -> length(r)).max().orElse(0));
+    System.out.println(list.stream().filter(s -> s.startsWith("a")).max(Comparator.comparing(String::length).orElse(0));;
+}
+```
+
+Q:上面这个操作是这个操作是迭代一次还是迭代两次呢？
+A：这个filter+max是迭代一次完成，如果要是迭代多次，stream后面的操作函数很多的情况下效率会非常低。不过filter是一个无状态的中间操作，所以stream只需要处理一次。
+如果使用了有状态的中间操作算子，则会处理两次。如distinct(),limit(),skip(),sorted(),sorted()。
+
+Q:短路操作与非短路操作
+A:短路操作和非短路操作都是Stream的结束操作，结束操作是针对中间操作来说的。短路操作是指不用处理全部元素就可以结束，包括下面的方法：  
+anyMatch(),allMatch(),noneMatch(),findFirst(),findAny()  
+非短路操作是指需要处理所有元素才能结束，包括下面的方法：  
+forEach(),forEachOrdered(),toArray(),reduce(),collect(),max(),min(),count()
+
+

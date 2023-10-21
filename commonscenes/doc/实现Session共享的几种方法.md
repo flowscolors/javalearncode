@@ -14,6 +14,14 @@ Cookies是作为HTTP传输的头信息的一部分发给客户机的，所以向
 Session是存储于服务端的、用于记录和保持某些状态的一种会话跟踪技术。用户通过浏览器发起请求的时候，不用每次都回传所有的Cookie值了，只要回传一个key-value的键值对就可以了.
 一般情况下这个key为JSESIONID，value为客户端第一次访问服务端时生成的唯一值，这个value可以标识和跟踪用户的会话信息，这个value在服务端被习惯称作sessionId。
 
+## Chrome禁用第三方cookie导致的登录失败
+触发原因：前后端分离，前端在一个节点，只是静态网页，chrome认为从后端获得的cookie是第三方cookie，在高版本chrome中会默认禁用。
+
+解决方法：
+1.调整chrome配置，disable这个设置。不方便，以后Chrome会全面禁止第三方cookie。
+2.调整server端配置，set-cookie时设置一种参数。需要改代码，而以后Chrome会全面禁止第三方cookie。
+3.调整前端nginx配置，前端在同个端口做一个upstream的代理，前端网页访问前端自己的代理，直接从第三方cookie到第一方cookie。解决问题，且不需要改代码。
+
 ## 1.客户端 Cookie 保存方式实现 Session 共享
 客户端 Cookie 保存实现, 即在服务器端将保存在保存在服务器中 Session 中的数据写入到 Cookie 后保存到客户端 (通常为浏览器LocalStorage) 中, 
 由于 Session 数据保存在客户端中, 所以每次请求都会带上这些 Session 数据, 因此即使两次请求在不同的服务器上也可以获取到 Session 数据, 以此达到 Session 共享, 
@@ -73,12 +81,28 @@ public JSONObject sessionGetTest(HttpServletRequest request) {
 ```
 
 ## 2.Tomcat 集群自带的 Session 复制功能实现 Session 共享
-Tomcat 集群之间可以通过组播的方式实现集群内的 Session 共享, 由于是 WEB 容器自带的, 所有配置起来比较简单, 修改 Tomcat 容器的配置文件即可, 但是由于通过组播方式同步, 
+
+传统单机web服务，用户session由容器进行存储管理。
+
+比如Tomcat 集群之间可以通过组播的方式实现集群内的 Session 共享, 由于是 WEB 容器自带的, 所有配置起来比较简单, 修改 Tomcat 容器的配置文件即可, 但是由于通过组播方式同步, 
 当其中一台机器的的 Session 数据发生变化时, 会分发到其他的机器来进行同步, 会造成一定的网络和性能开销, 集群越大, 开销越大, 不能线性的扩展, 因此这种方案只适合小型网站。
+
 
 ## 3.使用MySQL数据库实现 Session 共享
 Redis可以自己实现超时时间，MySQL就只能自己处理时间相关的逻辑了。
 
+1.创建Servlet过滤器，用Spring Session支持的实现替换HttpSession实现。
+直接使用@EnableJdbcHttpSession注解，指定数据库并创建对应表，Spring可以直接完成Session存储功能。
+
+2.在对应方法添加Session生成逻辑，并保证退出时session表会清除对应cookie数据。
+
+
+可能的问题:
+1.当首次登录同时多个请求要进行授权处理，而此时数据库并没有这条session，两个请求线程都会发现数据库没有这个数据，且双方无法相互感知，都会进行数据库插入操作，且插入数据相同，导致主键冲突。于是某个请求500，需要再次刷新才能正常访问。
+  解决方案:在登录的接口就进行数据库查询，无则插入Session的逻辑，保证先进行登录再执行发起请求。
+  
+参考文档：  
+https://helloworlde.github.io/2018/04/08/SpringBoot-%E4%BD%BF%E7%94%A8-Spring-Session-%E5%AE%9E%E7%8E%B0-Session-%E5%85%B1%E4%BA%AB/
 
 ## 4.使用Redis缓存实现 Session 共享
 目前比较主流的 Session 方式还是基于分布式缓存 Memcached 或 Redis 实现, 具体实现方式主要有 memcached-session-manager, tomcat-redis-session-manager 和 Spring Session, 前两者需要依赖 WEB 容器, 而后者不需要，记录该种实现方式。

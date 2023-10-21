@@ -21,14 +21,18 @@ ps aux | awk '{mem += $6} END {print mem/1024/1024}'
 cat /proc/meminfo | grep Slab
 vmstat -s
 ```
-
+  
 ## 虚拟内存
+
+首先，对于计算机技术而言，"虚拟内存"指的是一种内存管理的技术方式，而不是某种实现或工具，如Swap。虚拟内存做为虚构的内存空间，可以映射到实际的物理空间，从而分配实际内存。
+
+在虚拟内存技术中，硬盘等外部存储介质可以充当虚拟内存地址的临时媒介，所以也有人称该实现为虚拟内存，如Swap。当然也有人认为整个内存地址都是虚拟内存，因为使用的就是虚拟内存，而非实际地址。所以虚拟内存这个词需要整合语境看表达的什么。
 
 最初的操作系统并没有现在那么完善，刚开始的时候，程序是直接装载到物理内存中的。这就导致了下面的一些问题：程序编写困难。修改内存数据导致程序崩溃。
 
 虚拟内存概念的出现就解决了上面的问题，虚拟内存的概念出现后，程序的编写就不再直接操作物理内存了，对每个程序来说，它们就相当于拥有了所有的内存空间，可以随意操作，就不用担心自己操作的内存地址被其他程序占用的问题了。同时，因为程序操作的是虚拟内存地址，这样就不会出现因为修改了其他应用程序内存地址中的数据而导致其他应用程序崩溃的问题了。
 
-所以实际就有了两个内存，真实的内存，即实际的4C 12G的内存。虚拟内存，在64位操作系统上，可用的最大虚拟地址空间有16EB，即大概180亿GB。
+所以实际就有了两个内存，真实的内存，即实际的4C 12G的内存。虚拟内存，在64位操作系统上，可用的最大虚拟地址空间有16EB，即大概180亿GB。其实有点像request和limit的关系。
 ```
 void *mem = mmap(0, 4ul * 1024ul * 1024ul * 1024ul * 1024ul,PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE,-1, 0);
 ```
@@ -41,10 +45,16 @@ void *mem = mmap(0, 4ul * 1024ul * 1024ul * 1024ul * 1024ul,PROT_READ | PROT_WRI
 但是虚拟内存毕竟是操作系统的逻辑结构，应用程序最终还是要访问物理内存或者磁盘上的内容。应用并不会因为虚拟内存过大而OOM。
 
 参考文档：  
+【推荐】https://www.zhihu.com/question/295194595/answer/999804696
 https://www.cnblogs.com/seasonsluo/p/java_virt.html
 https://xie.infoq.cn/article/b2890eefbbead36c208318eaa
 https://www.easyice.cn/archives/341
 https://draveness.me/whys-the-design-os-virtual-memory/
+
+## Swap
+Swap是上一Part虚拟内存的第二种含义的实现，即"自动交换技术"。交换技术可以让正在或马上运行的程序获得足够的物理内存资源，让不需要或退出运行周期的程序让出占用的物理资源。
+
+并且这个技术由OS直接提供，不需要程序员手动实现。一般会由1.5到3倍物理内存的说法，或者默认，或者为了性能直接关闭。当然你关了Swap也会由虚拟内存使用，但是此时虚拟内存映射到的就全部是物理内存的值了。
 
 ## Slab
 接下来这个Slab就麻烦，它是真正占用物理内存，无法释放的Slab多了，就会导致操作系统OOM了。下面例子在一台4C 12G机器上。
@@ -100,3 +110,12 @@ cat /proc/slabinfo
 
 参考文档:  
 https://www.bianchengquan.com/article/507165.html
+
+## Docker中的cpu_set和cpu_share
+CPU Manager支持两种Policy，分别为none和static，通过kubelet --cpu-manager-policy设置，默认为none。
+none: 为cpu manager的默认值，相当于没有启用cpuset的能力。cpu request对应到cpu share，cpu limit对应到cpu quota。
+static: 目前，请设置--cpu-manager-policy=static来启用，kubelet将在Container启动前分配绑定的cpu set，分配时还会考虑cpu topology来提升cpu affinity。
+
+cpu_set : 默认关闭，需要手动开启，kubelet 去指向绑核操作。数目为request中声明的整数大小。
+cpu_share : 默认的request值。CFS调度中的权重，一般来说，在条件相同的情况下，cpushare值越高的，将会分得更多的时间片。
+cpu_quota ： 默认的limit值。cfs_quota_us/cfs_period_us代表了该容器实际可用的做多的CPU核数。

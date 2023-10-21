@@ -15,7 +15,7 @@ CyclicBarrier 与CountDownLatch区别就是，可以有不止一个栅栏，因�
 
 ## CyclicBarrier 内部方法
 CyclicBarrier内部并不是继承AQS实现的，而是使用ReentrantLock、Condition实现。
-```
+```text
 1.内部参数
 
     /** The lock for guarding barrier entry */                同步操作锁

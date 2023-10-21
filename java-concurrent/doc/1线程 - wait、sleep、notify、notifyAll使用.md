@@ -40,6 +40,10 @@ Exception in thread "main" java.lang.IllegalMonitorStateException
 ```
 waiting code
 
+当一个线程需要调用对象的wait()方法时，这个线程必须拥有该对象的锁。接着它就会释放这个对象锁并进入等待状态直到其他线程调用这个对象上的notify()方法。  
+当一个线程需要调用对象的或者notify()方法时，它会释放这个对象的锁，以便其他在等待的线程就可以得到这个对象锁。
+而这两个方法都需要线程持有对象的锁，所以没有synchronized保持锁其实也没有意义。这样就只能通过synchronized同步来实现，所以他们只能在同步方法或者同步块中被调用。
+
 ## 3.由基于wait notify的阻塞队列、生产者-消费者展开
 
 waiting code
@@ -71,6 +75,11 @@ leetcode/ProCon_ObjectWait.java:5
  　　join方法的作用是父线程等待子线程执行完成后再执行，换句话说就是将异步执行的线程合并为同步的线程。JDK中提供三个版本的join方法，其实现与wait方法类似，join()方法实际上执行的join(0)，而join(long millis, int nanos)也与wait(long millis, int nanos)的实现方式一致，暂时对纳秒的支持也是不完整的。
     实际join方法的使用场景会更多，JDK 1.8的forkjoinPool就是基于此。  
     join方法就是通过wait方法来将线程的阻塞，如果join的线程还在执行，则将当前线程阻塞起来，直到join的线程执行完成，当前线程才能执行。不过有一点需要注意，这里的join只调用了wait方法，却没有对应的notify方法，原因是Thread的start方法中做了相应的处理，所以当join的线程执行完成以后，会自动唤醒主线程继续往下执行。
+
+## 5.为什么wait, notify 和 notifyAll这些方法不在thread类里面
+一个明显的原因是Java提供的锁是对象级而不是线程级，每个对象都有锁，通过线程去往操作系统里获取锁。
+如果线程需要等待某些锁，则可以去调用对象的wait()方法，让对象wait。如果wait()方法在线程里，线程在等待哪个锁就不明显了。
+由于wait、notify、notifyAll这些都是锁级别的操作，所以把他们定义在Object中，因为锁属于对象。
 
 
 

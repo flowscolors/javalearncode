@@ -4,9 +4,10 @@
 ## OKHttp 组件概要
 
 
-maxRequests和maxReuestsPerHost值的设置与executorService线程池的设置有关联，请注意。maxRequests和maxRequestPerHost是okhttp内部维持的请求队列，而executorservice是实际发送请求的线程。如果maxRequests和maxReuestPerHost设置太大，executorService会因为线程太少而阻塞发送。
+maxRequests和maxReuestsPerHost值的设置与executorService线程池的设置有关联，请注意      。maxRequests和maxRequestPerHost是okhttp内部维持的请求队列，而executorservice是实际发送请求的线程。如果maxRequests和maxReuestPerHost设置太大，executorService会因为线程太少而阻塞发送。
 
 ## OkHttp源码解析
+
 
 连接池ConnectionPool
     连接池中连接复用机制。 https://blog.csdn.net/chunqiuwei/article/details/74203667
@@ -18,6 +19,13 @@ https://mrfzh.github.io/2019/07/19/okhttp3%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E
 https://juejin.cn/post/6844904196219600910
 https://www.cnblogs.com/ganchuanpu/p/9408081.html
 https://www.jianshu.com/p/a2fcf1dad6b5
+
+## OkHttp 请求流程
+
+
+参考文档：  
+https://www.jianshu.com/p/ecc57a81f73c
+https://segmentfault.com/a/1190000041128356
 
 
 ## OKHttp踩坑记录

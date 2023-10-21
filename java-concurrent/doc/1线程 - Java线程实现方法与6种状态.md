@@ -61,7 +61,17 @@ waiting code
 ## 4.上下文切换
 在这个运行过程中，线程由 RUNNABLE 转为非 RUNNABLE 的过程就是线程上下文切换。 我们可以用vmstat pidstat查看上下文切换次数。
 
+
+
+
+## 5.多线程中抛异常
+直接new线程，执行execute(),出现异常，会直接处理，可以看到堆栈输出。  
+直接new线程，执行submit(),出现异常，堆栈异常没有输出，调用Future.get()，可以捕获到异常。  
+线程池中线程，执行出现异常，线程池会被这个异常移除了，再创建一个新的线程放到线程池。  
+
+顺便一提所以未捕获的异常，都会触发ThreadGroup的 dispatchUncaughtException 方法，线程池满的拒绝策略抛出的RejectedExecutionException、除0的ArithemticException都会有JVM给你捕获并控制台输出了。
+
+
 参考文档:
 https://www.geekschool.org/2020/07/18/8868.html
 http://blog.objectspace.cn/2019/10/13/%E6%9C%80%E9%80%82%E5%90%88%E5%88%9D%E5%AD%A6%E8%80%85%E4%BA%86%E8%A7%A3%E7%9A%84Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8E%E5%B9%B6%E5%8F%91%E5%9F%BA%E7%A1%80/
-

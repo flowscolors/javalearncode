@@ -1,3 +1,4 @@
+
 以下参数基于MySQL 5.7.29版本讨论，5.6之前版本可能有部分参数不同，且含义不同。  
 
 ## 1.生产级参数配置表 
@@ -77,3 +78,31 @@ waiting code
 
 
 ## grafana参数解析
+MySQL Uptime      MySQL启动时间
+Currnet QPS       基于MySQL命令 show status; 的结果，计算最近1s的查询时间数目
+InnnoDB Buffer Pool Size    InnoDB会保持一个为数据和索引的buffer pool的存储区域，属于影响MySQL性能的最重要参数之一。大部分情况下是数据库宿主机的60% ~ 90%。
+
+Connections：
+MySQL Connections 数据连接数，Max Connection默认值151.Max used 是曾经使用的最大的值。
+MySQL Client Thread Activity    Thread Connected是open的连接数，Thread Running是没有sleeping的线程数。
+
+Table Locks：
+MySQL Questions  server端计算的statements数目。数目包括client发送到server端的statement，以及statement被存储但是没有被计算的。
+MySQL Thread Cache  设置存储多少线程server端可以存cache用来重用。当一个client关闭连接，该客户端线程会被放到cahche，如果cache未满。这样来尽量复用来连接cache。
+MySQL Select Types  大部分关系型数据库中，基于索引的查询会比全表扫描更有效。这里可以查看没有走索引的几种方式及其个数。Select Scan，代表全表扫描。Select Range，MySQL扫描了一个给定区域的所有行。Select Full Join， 代表join查询没有join到一个index，这通常会带来一个很大的查询。
+MySQL Table  Locks  存储引擎对应的MySQL tables 表锁的数目。在InnoDB中大部分是行锁，只有少部分情况是表锁。最有效的情况是比较 Locks Immediate和 Locks Waited值。前者增长是因为失败的操作，后者增长是意味着由锁住的连接。
+
+Sort：
+MySQL Sorts      代表MySQL的sort操作，包括order或者desc等命令，因为这些sort操作导致无法走index，从而导致全表扫描或者范围扫描。
+MySQL Slow Querues 代表MySQL的慢查询操作，阈值基于 long_query_time
+
+Memory： MySQL Internal Memeory Overview 
+System Memory    系统内存容量
+InnoDB Buffer Pool Data  InnoDB Buffer容量，存储cache数据和索引
+InnoDB Log Buffer Size   InnoDB log Buffer 提供运行事务运行，在事务提交之前不必一定写入磁盘的日志，写入该log buffer即可，默认128M。
+
+Command，Handles，Processed：
+Top Command Counters     统计每种操作的次数 select、update、insert、set_option、commit ··· 
+Top Command Counters Hourly 统计每种操作的次数，每小时统计数据。
+MySQL Handlers           MySQL 统计数据会统计MySQL进行 select、update、insert、set_option ··· 的操作
+MySQL Transaction Handlers  MySQL 统计数据会统计MySQL进行 commit 、 rollback ··· 的操作
